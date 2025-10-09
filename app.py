@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, render_template
 from flask_sqlalchemy import SQLAlchemy
 import os
 
@@ -30,6 +30,10 @@ class Preco(db.Model):
 
 @app.route('/')
 def home():
+    return render_template('index.html')
+
+@app.route('/api')
+def api():
     return jsonify({"message": "PromoPreço API v0.1"})
 
 @app.route('/produtos', methods=['GET', 'POST'])

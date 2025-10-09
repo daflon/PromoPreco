@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PromoPreço</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        .container { background: #f5f5f5; padding: 20px; border-radius: 8px; margin: 10px 0; }
+        input, button { padding: 8px; margin: 5px; }
+        button { background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        .result { background: white; padding: 10px; margin: 10px 0; border-radius: 4px; }
+    </style>
+</head>
+<body>
+    <h1>🏷️ PromoPreço</h1>
+    
+    <div class="container">
+        <h3>Adicionar Produto</h3>
+        <input type="text" id="prodCodigo" placeholder="Código">
+        <input type="text" id="prodDescricao" placeholder="Descrição">
+        <input type="text" id="prodEan" placeholder="EAN (opcional)">
+        <button onclick="addProduto()">Adicionar</button>
+    </div>
+
+    <div class="container">
+        <h3>Adicionar Estabelecimento</h3>
+        <input type="text" id="estNome" placeholder="Nome">
+        <input type="text" id="estUrl" placeholder="URL (opcional)">
+        <button onclick="addEstabelecimento()">Adicionar</button>
+    </div>
+
+    <div class="container">
+        <h3>Adicionar Preço</h3>
+        <input type="number" id="precoProductId" placeholder="ID Produto">
+        <input type="number" id="precoEstId" placeholder="ID Estabelecimento">
+        <input type="number" id="precoValor" placeholder="Valor" step="0.01">
+        <button onclick="addPreco()">Adicionar</button>
+    </div>
+
+    <div class="container">
+        <h3>Consultar</h3>
+        <button onclick="getProdutos()">Produtos</button>
+        <button onclick="getEstabelecimentos()">Estabelecimentos</button>
+        <button onclick="getPrecos()">Preços</button>
+    </div>
+
+    <div id="resultado" class="result" style="display:none;"></div>
+
+    <script>
+        const API_BASE = '';
+
+        async function addProduto() {
+            const data = {
+                codigo: document.getElementById('prodCodigo').value,
+                descricao: document.getElementById('prodDescricao').value,
+                ean: document.getElementById('prodEan').value
+            };
+            const response = await fetch('/produtos', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(data)
+            });
+            showResult(await response.json());
+        }
+
+        async function addEstabelecimento() {
+            const data = {
+                nome: document.getElementById('estNome').value,
+                url: document.getElementById('estUrl').value
+            };
+            const response = await fetch('/estabelecimentos', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(data)
+            });
+            showResult(await response.json());
+        }
+
+        async function addPreco() {
+            const data = {
+                produto_id: parseInt(document.getElementById('precoProductId').value),
+                estabelecimento_id: parseInt(document.getElementById('precoEstId').value),
+                valor: parseFloat(document.getElementById('precoValor').value)
+            };
+            const response = await fetch('/precos', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(data)
+            });
+            showResult(await response.json());
+        }
+
+        async function getProdutos() {
+            const response = await fetch('/produtos');
+            showResult(await response.json());
+        }
+
+        async function getEstabelecimentos() {
+            const response = await fetch('/estabelecimentos');
+            showResult(await response.json());
+        }
+
+        async function getPrecos() {
+            const response = await fetch('/precos');
+            showResult(await response.json());
+        }
+
+        function showResult(data) {
+            const div = document.getElementById('resultado');
+            div.innerHTML = '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+            div.style.display = 'block';
+        }
+    </script>
+</body>
+</html>
