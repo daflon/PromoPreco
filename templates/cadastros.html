@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PromoPreço - Cadastros</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f5f5f5; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .card { background: white; padding: 20px; margin: 20px 0; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        h1 { color: #333; text-align: center; }
+        h2 { color: #555; border-bottom: 2px solid #007bff; padding-bottom: 10px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input, select { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
+        button { background-color: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { background-color: #0056b3; }
+        .success { color: green; margin-top: 10px; }
+        .error { color: red; margin-top: 10px; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
+        @media (max-width: 768px) { .grid { grid-template-columns: 1fr; } }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th, td { padding: 8px; text-align: left; border-bottom: 1px solid #ddd; }
+        th { background-color: #f8f9fa; font-weight: bold; }
+        tr:hover { background-color: #f5f5f5; }
+        .no-data { text-align: center; color: #666; padding: 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>PromoPreço - Sistema de Cadastros</h1>
+        
+        <div class="grid">
+            <!-- Cadastro de Produtos -->
+            <div class="card">
+                <h2>Cadastro de Produtos</h2>
+                <form id="formProduto">
+                    <div class="form-group">
+                        <label for="codigo">Código:</label>
+                        <input type="text" id="codigo" name="codigo" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="descricao">Descrição:</label>
+                        <input type="text" id="descricao" name="descricao" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="ean">EAN:</label>
+                        <input type="text" id="ean" name="ean">
+                    </div>
+                    <button type="submit">Cadastrar Produto</button>
+                    <div id="msgProduto"></div>
+                </form>
+            </div>
+
+            <!-- Cadastro de Estabelecimentos -->
+            <div class="card">
+                <h2>Cadastro de Estabelecimentos</h2>
+                <form id="formEstabelecimento">
+                    <div class="form-group">
+                        <label for="nome">Nome:</label>
+                        <input type="text" id="nome" name="nome" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="cnpj">CNPJ:</label>
+                        <input type="text" id="cnpj" name="cnpj">
+                    </div>
+                    <button type="submit">Cadastrar Estabelecimento</button>
+                    <div id="msgEstabelecimento"></div>
+                </form>
+            </div>
+
+            <!-- Cadastro de Preços -->
+            <div class="card">
+                <h2>Cadastro de Preços</h2>
+                <form id="formPreco">
+                    <div class="form-group">
+                        <label for="produto_id">Produto:</label>
+                        <select id="produto_id" name="produto_id" required>
+                            <option value="">Selecione um produto</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="estabelecimento_id">Estabelecimento:</label>
+                        <select id="estabelecimento_id" name="estabelecimento_id" required>
+                            <option value="">Selecione um estabelecimento</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="preco">Preço:</label>
+                        <input type="number" id="preco" name="preco" step="0.01" required>
+                    </div>
+                    <button type="submit">Cadastrar Preço</button>
+                    <div id="msgPreco"></div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Seção de Listagem e Busca -->
+        <div class="card">
+            <h2>Consultar Cadastros</h2>
+            <div class="form-group">
+                <label for="tipoBusca">Tipo de Cadastro:</label>
+                <select id="tipoBusca" onchange="carregarListagem()">
+                    <option value="">Selecione o tipo</option>
+                    <option value="produtos">Produtos</option>
+                    <option value="estabelecimentos">Estabelecimentos</option>
+                    <option value="precos">Preços</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="busca">Buscar:</label>
+                <input type="text" id="busca" placeholder="Digite para buscar..." oninput="filtrarListagem()">
+            </div>
+            <div id="listagemContainer"></div>
+        </div>
+    </div>
+
+    <script>
+        // Carregar produtos e estabelecimentos nos selects
+        async function carregarDados() {
+            try {
+                const [produtos, estabelecimentos] = await Promise.all([
+                    fetch('/produtos').then(r => r.json()),
+                    fetch('/estabelecimentos').then(r => r.json())
+                ]);
+
+                const selectProduto = document.getElementById('produto_id');
+                produtos.forEach(p => {
+                    const option = document.createElement('option');
+                    option.value = p.id;
+                    option.textContent = `${p.codigo} - ${p.descricao}`;
+                    selectProduto.appendChild(option);
+                });
+
+                const selectEstab = document.getElementById('estabelecimento_id');
+                estabelecimentos.forEach(e => {
+                    const option = document.createElement('option');
+                    option.value = e.id;
+                    option.textContent = e.nome;
+                    selectEstab.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Erro ao carregar dados:', error);
+            }
+        }
+
+        // Cadastro de produto
+        document.getElementById('formProduto').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData);
+            
+            try {
+                const response = await fetch('/produtos', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                
+                if (response.ok) {
+                    document.getElementById('msgProduto').innerHTML = '<div class="success">Produto cadastrado com sucesso!</div>';
+                    e.target.reset();
+                    carregarDados();
+                } else {
+                    document.getElementById('msgProduto').innerHTML = '<div class="error">Erro ao cadastrar produto</div>';
+                }
+            } catch (error) {
+                document.getElementById('msgProduto').innerHTML = '<div class="error">Erro de conexão</div>';
+            }
+        });
+
+        // Cadastro de estabelecimento
+        document.getElementById('formEstabelecimento').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData);
+            
+            try {
+                const response = await fetch('/estabelecimentos', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                
+                if (response.ok) {
+                    document.getElementById('msgEstabelecimento').innerHTML = '<div class="success">Estabelecimento cadastrado com sucesso!</div>';
+                    e.target.reset();
+                    carregarDados();
+                } else {
+                    document.getElementById('msgEstabelecimento').innerHTML = '<div class="error">Erro ao cadastrar estabelecimento</div>';
+                }
+            } catch (error) {
+                document.getElementById('msgEstabelecimento').innerHTML = '<div class="error">Erro de conexão</div>';
+            }
+        });
+
+        // Cadastro de preço
+        document.getElementById('formPreco').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData);
+            
+            try {
+                const response = await fetch('/precos', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                
+                if (response.ok) {
+                    document.getElementById('msgPreco').innerHTML = '<div class="success">Preço cadastrado com sucesso!</div>';
+                    e.target.reset();
+                } else {
+                    document.getElementById('msgPreco').innerHTML = '<div class="error">Erro ao cadastrar preço</div>';
+                }
+            } catch (error) {
+                document.getElementById('msgPreco').innerHTML = '<div class="error">Erro de conexão</div>';
+            }
+        });
+
+        // Variáveis globais para listagem
+        let dadosAtuais = [];
+        let produtosMap = {};
+        let estabelecimentosMap = {};
+
+        // Carregar listagem por tipo
+        async function carregarListagem() {
+            const tipo = document.getElementById('tipoBusca').value;
+            const container = document.getElementById('listagemContainer');
+            
+            if (!tipo) {
+                container.innerHTML = '';
+                return;
+            }
+
+            try {
+                const response = await fetch(`/${tipo}`);
+                dadosAtuais = await response.json();
+                
+                if (tipo === 'precos') {
+                    await carregarMaps();
+                }
+                
+                exibirListagem(dadosAtuais, tipo);
+            } catch (error) {
+                container.innerHTML = '<div class="error">Erro ao carregar dados</div>';
+            }
+        }
+
+        // Carregar mapas de produtos e estabelecimentos
+        async function carregarMaps() {
+            try {
+                const [produtos, estabelecimentos] = await Promise.all([
+                    fetch('/produtos').then(r => r.json()),
+                    fetch('/estabelecimentos').then(r => r.json())
+                ]);
+                
+                produtosMap = {};
+                estabelecimentosMap = {};
+                
+                produtos.forEach(p => produtosMap[p.id] = p);
+                estabelecimentos.forEach(e => estabelecimentosMap[e.id] = e);
+            } catch (error) {
+                console.error('Erro ao carregar mapas:', error);
+            }
+        }
+
+        // Exibir listagem
+        function exibirListagem(dados, tipo) {
+            const container = document.getElementById('listagemContainer');
+            
+            if (dados.length === 0) {
+                container.innerHTML = '<div class="no-data">Nenhum registro encontrado</div>';
+                return;
+            }
+
+            let html = '<table><thead><tr>';
+            
+            if (tipo === 'produtos') {
+                html += '<th>ID</th><th>Código</th><th>Descrição</th><th>EAN</th>';
+            } else if (tipo === 'estabelecimentos') {
+                html += '<th>ID</th><th>Nome</th><th>CNPJ</th>';
+            } else if (tipo === 'precos') {
+                html += '<th>ID</th><th>Produto</th><th>Estabelecimento</th><th>Preço</th><th>Data</th>';
+            }
+            
+            html += '</tr></thead><tbody>';
+            
+            dados.forEach(item => {
+                html += '<tr>';
+                if (tipo === 'produtos') {
+                    html += `<td>${item.id}</td><td>${item.codigo}</td><td>${item.descricao}</td><td>${item.ean || ''}</td>`;
+                } else if (tipo === 'estabelecimentos') {
+                    html += `<td>${item.id}</td><td>${item.nome}</td><td>${item.cnpj || ''}</td>`;
+                } else if (tipo === 'precos') {
+                    const produto = produtosMap[item.produto_id] || {};
+                    const estabelecimento = estabelecimentosMap[item.estabelecimento_id] || {};
+                    const data = new Date(item.data_coleta).toLocaleString('pt-BR');
+                    html += `<td>${item.id}</td><td>${produto.codigo || ''} - ${produto.descricao || ''}</td><td>${estabelecimento.nome || ''}</td><td>R$ ${item.preco.toFixed(2)}</td><td>${data}</td>`;
+                }
+                html += '</tr>';
+            });
+            
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        }
+
+        // Filtrar listagem
+        function filtrarListagem() {
+            const busca = document.getElementById('busca').value.toLowerCase();
+            const tipo = document.getElementById('tipoBusca').value;
+            
+            if (!tipo || !dadosAtuais.length) return;
+            
+            let dadosFiltrados = dadosAtuais;
+            
+            if (busca) {
+                dadosFiltrados = dadosAtuais.filter(item => {
+                    if (tipo === 'produtos') {
+                        return item.codigo.toLowerCase().includes(busca) || 
+                               item.descricao.toLowerCase().includes(busca) ||
+                               (item.ean && item.ean.toLowerCase().includes(busca));
+                    } else if (tipo === 'estabelecimentos') {
+                        return item.nome.toLowerCase().includes(busca) ||
+                               (item.cnpj && item.cnpj.toLowerCase().includes(busca));
+                    } else if (tipo === 'precos') {
+                        const produto = produtosMap[item.produto_id] || {};
+                        const estabelecimento = estabelecimentosMap[item.estabelecimento_id] || {};
+                        return (produto.codigo && produto.codigo.toLowerCase().includes(busca)) ||
+                               (produto.descricao && produto.descricao.toLowerCase().includes(busca)) ||
+                               (estabelecimento.nome && estabelecimento.nome.toLowerCase().includes(busca)) ||
+                               item.preco.toString().includes(busca);
+                    }
+                    return false;
+                });
+            }
+            
+            exibirListagem(dadosFiltrados, tipo);
+        }
+
+        // Carregar dados ao inicializar
+        carregarDados();
+    </script>
+</body>
+</html>
