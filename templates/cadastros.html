@@ -5,117 +5,168 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PromoPreço - Cadastros</title>
     <style>
-        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f5f5f5; }
-        .container { max-width: 1200px; margin: 0 auto; }
-        .card { background: white; padding: 20px; margin: 20px 0; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        h1 { color: #333; text-align: center; }
-        h2 { color: #555; border-bottom: 2px solid #007bff; padding-bottom: 10px; }
-        .form-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 5px; font-weight: bold; }
-        input, select { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
-        button { background-color: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; }
-        button:hover { background-color: #0056b3; }
-        .success { color: green; margin-top: 10px; }
-        .error { color: red; margin-top: 10px; }
-        .grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
-        @media (max-width: 768px) { .grid { grid-template-columns: 1fr; } }
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        th, td { padding: 8px; text-align: left; border-bottom: 1px solid #ddd; }
-        th { background-color: #f8f9fa; font-weight: bold; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background-color: #f5f5f5; height: 100vh; }
+        .container { display: flex; height: 100vh; }
+        
+        .sidebar { width: 250px; background: #2c3e50; color: white; padding: 20px 0; }
+        .sidebar h1 { padding: 0 20px 30px; font-size: 20px; border-bottom: 1px solid #34495e; }
+        .menu-item { padding: 15px 20px; cursor: pointer; border-bottom: 1px solid #34495e; transition: background 0.3s; }
+        .menu-item:hover { background: #34495e; }
+        .menu-item.active { background: #3498db; }
+        
+        .main-content { flex: 1; padding: 30px; overflow-y: auto; }
+        .content-section { display: none; }
+        .content-section.active { display: block; }
+        
+        .card { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        h2 { color: #2c3e50; margin-bottom: 25px; font-size: 24px; }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 8px; font-weight: bold; color: #555; }
+        input, select { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; }
+        button { background-color: #3498db; color: white; padding: 12px 25px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; }
+        button:hover { background-color: #2980b9; }
+        .success { color: #27ae60; margin-top: 15px; padding: 10px; background: #d5f4e6; border-radius: 4px; }
+        .error { color: #e74c3c; margin-top: 15px; padding: 10px; background: #fadbd8; border-radius: 4px; }
+        
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
+        th { background-color: #f8f9fa; font-weight: bold; color: #2c3e50; }
         tr:hover { background-color: #f5f5f5; }
-        .no-data { text-align: center; color: #666; padding: 20px; }
+        .no-data { text-align: center; color: #666; padding: 40px; }
+        
+        .search-section { margin-bottom: 25px; }
+        .search-row { display: flex; gap: 15px; margin-bottom: 15px; }
+        .search-row > div { flex: 1; }
+        
+        @media (max-width: 768px) {
+            .container { flex-direction: column; }
+            .sidebar { width: 100%; height: auto; }
+            .search-row { flex-direction: column; }
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>PromoPreço - Sistema de Cadastros</h1>
+        <div class="sidebar">
+            <h1>PromoPreço</h1>
+            <div class="menu-item active" onclick="showSection('produtos')">Cadastro de Produtos</div>
+            <div class="menu-item" onclick="showSection('estabelecimentos')">Cadastro de Estabelecimentos</div>
+            <div class="menu-item" onclick="showSection('precos')">Cadastro de Preços</div>
+            <div class="menu-item" onclick="showSection('consultas')">Consultar Cadastros</div>
+        </div>
         
-        <div class="grid">
+        <div class="main-content">
             <!-- Cadastro de Produtos -->
-            <div class="card">
-                <h2>Cadastro de Produtos</h2>
-                <form id="formProduto">
-                    <div class="form-group">
-                        <label for="codigo">Código:</label>
-                        <input type="text" id="codigo" name="codigo" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="descricao">Descrição:</label>
-                        <input type="text" id="descricao" name="descricao" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="ean">EAN:</label>
-                        <input type="text" id="ean" name="ean">
-                    </div>
-                    <button type="submit">Cadastrar Produto</button>
-                    <div id="msgProduto"></div>
-                </form>
+            <div id="produtos" class="content-section active">
+                <div class="card">
+                    <h2>Cadastro de Produtos</h2>
+                    <form id="formProduto">
+                        <div class="form-group">
+                            <label for="codigo">Código:</label>
+                            <input type="text" id="codigo" name="codigo" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="descricao">Descrição:</label>
+                            <input type="text" id="descricao" name="descricao" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="ean">EAN:</label>
+                            <input type="text" id="ean" name="ean">
+                        </div>
+                        <button type="submit">Cadastrar Produto</button>
+                        <div id="msgProduto"></div>
+                    </form>
+                </div>
             </div>
 
             <!-- Cadastro de Estabelecimentos -->
-            <div class="card">
-                <h2>Cadastro de Estabelecimentos</h2>
-                <form id="formEstabelecimento">
-                    <div class="form-group">
-                        <label for="nome">Nome:</label>
-                        <input type="text" id="nome" name="nome" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="cnpj">CNPJ:</label>
-                        <input type="text" id="cnpj" name="cnpj">
-                    </div>
-                    <button type="submit">Cadastrar Estabelecimento</button>
-                    <div id="msgEstabelecimento"></div>
-                </form>
+            <div id="estabelecimentos" class="content-section">
+                <div class="card">
+                    <h2>Cadastro de Estabelecimentos</h2>
+                    <form id="formEstabelecimento">
+                        <div class="form-group">
+                            <label for="nome">Nome:</label>
+                            <input type="text" id="nome" name="nome" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="cnpj">CNPJ:</label>
+                            <input type="text" id="cnpj" name="cnpj">
+                        </div>
+                        <button type="submit">Cadastrar Estabelecimento</button>
+                        <div id="msgEstabelecimento"></div>
+                    </form>
+                </div>
             </div>
 
             <!-- Cadastro de Preços -->
-            <div class="card">
-                <h2>Cadastro de Preços</h2>
-                <form id="formPreco">
-                    <div class="form-group">
-                        <label for="produto_id">Produto:</label>
-                        <select id="produto_id" name="produto_id" required>
-                            <option value="">Selecione um produto</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="estabelecimento_id">Estabelecimento:</label>
-                        <select id="estabelecimento_id" name="estabelecimento_id" required>
-                            <option value="">Selecione um estabelecimento</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="preco">Preço:</label>
-                        <input type="number" id="preco" name="preco" step="0.01" required>
-                    </div>
-                    <button type="submit">Cadastrar Preço</button>
-                    <div id="msgPreco"></div>
-                </form>
+            <div id="precos" class="content-section">
+                <div class="card">
+                    <h2>Cadastro de Preços</h2>
+                    <form id="formPreco">
+                        <div class="form-group">
+                            <label for="produto_id">Produto:</label>
+                            <select id="produto_id" name="produto_id" required>
+                                <option value="">Selecione um produto</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="estabelecimento_id">Estabelecimento:</label>
+                            <select id="estabelecimento_id" name="estabelecimento_id" required>
+                                <option value="">Selecione um estabelecimento</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="preco">Preço:</label>
+                            <input type="number" id="preco" name="preco" step="0.01" required>
+                        </div>
+                        <button type="submit">Cadastrar Preço</button>
+                        <div id="msgPreco"></div>
+                    </form>
+                </div>
             </div>
-        </div>
 
-        <!-- Seção de Listagem e Busca -->
-        <div class="card">
-            <h2>Consultar Cadastros</h2>
-            <div class="form-group">
-                <label for="tipoBusca">Tipo de Cadastro:</label>
-                <select id="tipoBusca" onchange="carregarListagem()">
-                    <option value="">Selecione o tipo</option>
-                    <option value="produtos">Produtos</option>
-                    <option value="estabelecimentos">Estabelecimentos</option>
-                    <option value="precos">Preços</option>
-                </select>
+            <!-- Consultas -->
+            <div id="consultas" class="content-section">
+                <div class="card">
+                    <h2>Consultar Cadastros</h2>
+                    <div class="search-section">
+                        <div class="search-row">
+                            <div>
+                                <label for="tipoBusca">Tipo de Cadastro:</label>
+                                <select id="tipoBusca" onchange="carregarListagem()">
+                                    <option value="">Selecione o tipo</option>
+                                    <option value="produtos">Produtos</option>
+                                    <option value="estabelecimentos">Estabelecimentos</option>
+                                    <option value="precos">Preços</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="busca">Buscar:</label>
+                                <input type="text" id="busca" placeholder="Digite para buscar..." oninput="filtrarListagem()">
+                            </div>
+                        </div>
+                    </div>
+                    <div id="listagemContainer"></div>
+                </div>
             </div>
-            <div class="form-group">
-                <label for="busca">Buscar:</label>
-                <input type="text" id="busca" placeholder="Digite para buscar..." oninput="filtrarListagem()">
-            </div>
-            <div id="listagemContainer"></div>
         </div>
     </div>
 
     <script>
+        // Função para mostrar seção
+        function showSection(sectionId) {
+            // Remover classe active de todos os itens do menu
+            document.querySelectorAll('.menu-item').forEach(item => item.classList.remove('active'));
+            // Adicionar classe active ao item clicado
+            event.target.classList.add('active');
+            
+            // Esconder todas as seções
+            document.querySelectorAll('.content-section').forEach(section => section.classList.remove('active'));
+            // Mostrar seção selecionada
+            document.getElementById(sectionId).classList.add('active');
+        }
+        
         // Carregar produtos e estabelecimentos nos selects
         async function carregarDados() {
             try {
