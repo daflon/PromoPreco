@@ -34,6 +34,52 @@
         th { background-color: #f8f9fa; font-weight: bold; color: #2c3e50; }
         tr:hover { background-color: #f5f5f5; }
         .no-data { text-align: center; color: #666; padding: 40px; }
+        .loading { text-align: center; padding: 20px; color: #7f8c8d; }
+        .spinner { 
+            display: inline-block; 
+            width: 20px; 
+            height: 20px; 
+            border: 3px solid #f3f3f3; 
+            border-top: 3px solid #3498db; 
+            border-radius: 50%; 
+            animation: spin 1s linear infinite; 
+            margin-right: 10px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        mark { 
+            background-color: #fff3cd; 
+            color: #856404; 
+            padding: 1px 2px; 
+            border-radius: 2px;
+            font-weight: bold;
+        }
+        .search-row input:focus, #busca_produto:focus {
+            border-color: #3498db;
+            box-shadow: 0 0 5px rgba(52, 152, 219, 0.3);
+            outline: none;
+        }
+        
+        #busca_produto {
+            background-color: #f8f9fa;
+            border: 2px solid #e9ecef;
+            transition: all 0.3s ease;
+        }
+        
+        #busca_produto:focus {
+            background-color: white;
+            border-color: #3498db;
+        }
+        .error {
+            color: #e74c3c;
+            background: #fadbd8;
+            padding: 15px;
+            border-radius: 4px;
+            text-align: center;
+            margin: 20px 0;
+        }
         
         .search-section { margin-bottom: 25px; }
         .search-row { display: flex; gap: 15px; margin-bottom: 15px; }
@@ -50,6 +96,7 @@
     <div class="container">
         <div class="sidebar">
             <h1>PromoPreço</h1>
+            <div class="menu-item" onclick="window.location.href='/dashboard'">📊 Dashboard</div>
             <div class="menu-item active" onclick="showSection('produtos')">Cadastro de Produtos</div>
             <div class="menu-item" onclick="showSection('estabelecimentos')">Cadastro de Estabelecimentos</div>
             <div class="menu-item" onclick="showSection('precos')">Cadastro de Preços</div>
@@ -63,22 +110,21 @@
                     <h2>Cadastro de Produtos</h2>
                     <form id="formProduto">
                         <div class="form-group">
-                            <label for="codigo">Código:</label>
-                            <input type="text" id="codigo" name="codigo" required>
-                        </div>
-                        <div class="form-group">
                             <label for="descricao">Descrição:</label>
                             <input type="text" id="descricao" name="descricao" required>
                         </div>
+
                         <div class="form-group">
                             <label for="ean">EAN:</label>
-                            <input type="text" id="ean" name="ean">
+                            <input type="text" id="ean" name="ean" placeholder="0000000000000" maxlength="13">
                         </div>
                         <button type="submit">Cadastrar Produto</button>
                         <div id="msgProduto"></div>
                     </form>
                 </div>
             </div>
+
+
 
             <!-- Cadastro de Estabelecimentos -->
             <div id="estabelecimentos" class="content-section">
@@ -91,7 +137,15 @@
                         </div>
                         <div class="form-group">
                             <label for="cnpj">CNPJ:</label>
-                            <input type="text" id="cnpj" name="cnpj">
+                            <input type="text" id="cnpj" name="cnpj" placeholder="00.000.000/0000-00" maxlength="18">
+                        </div>
+                        <div class="form-group">
+                            <label for="bairro">Bairro:</label>
+                            <input type="text" id="bairro" name="bairro" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="cidade">Cidade:</label>
+                            <input type="text" id="cidade" name="cidade" required>
                         </div>
                         <button type="submit">Cadastrar Estabelecimento</button>
                         <div id="msgEstabelecimento"></div>
@@ -105,8 +159,9 @@
                     <h2>Cadastro de Preços</h2>
                     <form id="formPreco">
                         <div class="form-group">
-                            <label for="produto_id">Produto:</label>
-                            <select id="produto_id" name="produto_id" required>
+                            <label for="produto_id">🔍 Buscar Produto:</label>
+                            <input type="text" id="busca_produto" placeholder="Digite para buscar produto..." autocomplete="off">
+                            <select id="produto_id" name="produto_id" required style="margin-top: 10px;">
                                 <option value="">Selecione um produto</option>
                             </select>
                         </div>
@@ -118,7 +173,7 @@
                         </div>
                         <div class="form-group">
                             <label for="preco">Preço:</label>
-                            <input type="number" id="preco" name="preco" step="0.01" required>
+                            <input type="number" id="preco" name="preco" step="0.01" min="0.01" placeholder="0.00" required>
                         </div>
                         <button type="submit">Cadastrar Preço</button>
                         <div id="msgPreco"></div>
@@ -137,13 +192,14 @@
                                 <select id="tipoBusca" onchange="carregarListagem()">
                                     <option value="">Selecione o tipo</option>
                                     <option value="produtos">Produtos</option>
+
                                     <option value="estabelecimentos">Estabelecimentos</option>
                                     <option value="precos">Preços</option>
                                 </select>
                             </div>
                             <div>
                                 <label for="busca">Buscar:</label>
-                                <input type="text" id="busca" placeholder="Digite para buscar..." oninput="filtrarListagem()">
+                                <input type="text" id="busca" placeholder="Digite para buscar..." oninput="filtrarListagem()" autocomplete="off">
                             </div>
                         </div>
                     </div>
@@ -158,8 +214,17 @@
         function showSection(sectionId) {
             // Remover classe active de todos os itens do menu
             document.querySelectorAll('.menu-item').forEach(item => item.classList.remove('active'));
-            // Adicionar classe active ao item clicado
-            event.target.classList.add('active');
+            
+            // Adicionar classe active ao item correspondente
+            const menuItems = {
+                'produtos': 0,
+                'estabelecimentos': 1,
+                'precos': 2,
+                'consultas': 3
+            };
+            if (menuItems[sectionId] !== undefined) {
+                document.querySelectorAll('.menu-item')[menuItems[sectionId]].classList.add('active');
+            }
             
             // Esconder todas as seções
             document.querySelectorAll('.content-section').forEach(section => section.classList.remove('active'));
@@ -167,32 +232,193 @@
             document.getElementById(sectionId).classList.add('active');
         }
         
-        // Carregar produtos e estabelecimentos nos selects
+        // Máscaras de formatação
+        function formatarCNPJ(value) {
+            return value.replace(/\D/g, '')
+                       .replace(/(\d{2})(\d)/, '$1.$2')
+                       .replace(/(\d{3})(\d)/, '$1.$2')
+                       .replace(/(\d{3})(\d)/, '$1/$2')
+                       .replace(/(\d{4})(\d)/, '$1-$2')
+                       .replace(/(-\d{2})\d+?$/, '$1');
+        }
+        
+        function formatarEAN(value) {
+            return value.replace(/\D/g, '').substring(0, 13);
+        }
+        
+        // Aplicar máscaras
+        document.getElementById('cnpj').addEventListener('input', function(e) {
+            e.target.value = formatarCNPJ(e.target.value);
+        });
+        
+        document.getElementById('ean').addEventListener('input', function(e) {
+            e.target.value = formatarEAN(e.target.value);
+        });
+        
+        // Variáveis globais para busca de produtos
+        let todosProdutos = [];
+        let timeoutBuscaProduto = null;
+
+        
+        // Carregar produtos, estabelecimentos e categorias nos selects
         async function carregarDados() {
             try {
-                const [produtos, estabelecimentos] = await Promise.all([
-                    fetch('/produtos').then(r => r.json()),
-                    fetch('/estabelecimentos').then(r => r.json())
-                ]);
+                const produtosResponse = await fetch('/produtos');
+                const estabelecimentosResponse = await fetch('/estabelecimentos');
+                
+                if (!produtosResponse.ok) {
+                    throw new Error(`Erro ao carregar produtos: ${produtosResponse.status}`);
+                }
+                if (!estabelecimentosResponse.ok) {
+                    throw new Error(`Erro ao carregar estabelecimentos: ${estabelecimentosResponse.status}`);
+                }
+                
+                const produtos = await produtosResponse.json();
+                const estabelecimentos = await estabelecimentosResponse.json();
+                
+                if (!Array.isArray(produtos)) {
+                    throw new Error('Dados de produtos inválidos');
+                }
+                if (!Array.isArray(estabelecimentos)) {
+                    throw new Error('Dados de estabelecimentos inválidos');
+                }
 
+                todosProdutos = produtos;
+                
+                // Limpar e popular select de produtos
                 const selectProduto = document.getElementById('produto_id');
+                selectProduto.innerHTML = '<option value="">Selecione um produto</option>';
                 produtos.forEach(p => {
                     const option = document.createElement('option');
                     option.value = p.id;
-                    option.textContent = `${p.codigo} - ${p.descricao}`;
+                    option.textContent = `${p.id} - ${p.descricao}`;
                     selectProduto.appendChild(option);
                 });
 
+                // Limpar e popular select de estabelecimentos
                 const selectEstab = document.getElementById('estabelecimento_id');
+                selectEstab.innerHTML = '<option value="">Selecione um estabelecimento</option>';
                 estabelecimentos.forEach(e => {
                     const option = document.createElement('option');
                     option.value = e.id;
                     option.textContent = e.nome;
                     selectEstab.appendChild(option);
                 });
+                
+
+                
+                console.log(`Dados carregados: ${produtos.length} produtos, ${estabelecimentos.length} estabelecimentos`);
+                ocultarStatusCarregamento();
+                
             } catch (error) {
                 console.error('Erro ao carregar dados:', error);
+                
+                // Mostrar erro específico para o usuário
+                const errorMsg = `<div class="error">Erro ao carregar dados: ${error.message}. Verifique se o servidor está rodando.</div>`;
+                
+                const msgElements = ['msgProduto', 'msgEstabelecimento', 'msgPreco'];
+                msgElements.forEach(id => {
+                    const element = document.getElementById(id);
+                    if (element) {
+                        element.innerHTML = errorMsg;
+                    }
+                });
+                
+                ocultarStatusCarregamento();
             }
+        }
+        
+        // Busca de produtos com fuzzy search
+        async function buscarProdutos(termo) {
+            if (!termo || termo.length < 2) {
+                // Se termo muito curto, mostra todos os produtos
+                atualizarSelectProdutos(todosProdutos);
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/produtos?q=${encodeURIComponent(termo)}`);
+                if (response.ok) {
+                    const produtos = await response.json();
+                    atualizarSelectProdutos(produtos);
+                } else {
+                    console.error('Erro na busca de produtos');
+                }
+            } catch (error) {
+                console.error('Erro na busca:', error);
+                // Em caso de erro, filtra localmente
+                const produtosFiltrados = todosProdutos.filter(p => 
+                    p.descricao.toLowerCase().includes(termo.toLowerCase()) ||
+                    (p.ean && p.ean.includes(termo))
+                );
+                atualizarSelectProdutos(produtosFiltrados);
+            }
+        }
+        
+        // Atualizar select de produtos com resultados da busca
+        function atualizarSelectProdutos(produtos) {
+            const select = document.getElementById('produto_id');
+            const valorAtual = select.value;
+            
+            // Limpar opções exceto a primeira
+            select.innerHTML = '<option value="">Selecione um produto</option>';
+            
+            // Adicionar produtos filtrados
+            produtos.forEach(p => {
+                const option = document.createElement('option');
+                option.value = p.id;
+                option.textContent = `${p.id} - ${p.descricao}`;
+                select.appendChild(option);
+            });
+            
+            // Restaurar valor se ainda existir
+            if (valorAtual && produtos.find(p => p.id == valorAtual)) {
+                select.value = valorAtual;
+            }
+        }
+        
+        // Event listener para busca de produtos
+        document.addEventListener('DOMContentLoaded', function() {
+            const buscaProduto = document.getElementById('busca_produto');
+            
+            // Mostrar indicador de carregamento inicial
+            mostrarStatusCarregamento('Carregando dados iniciais...');
+            
+            buscaProduto.addEventListener('input', function(e) {
+                const termo = e.target.value.trim();
+                
+                // Limpar timeout anterior
+                if (timeoutBuscaProduto) {
+                    clearTimeout(timeoutBuscaProduto);
+                }
+                
+                // Debounce de 300ms
+                timeoutBuscaProduto = setTimeout(() => {
+                    buscarProdutos(termo);
+                }, 300);
+            });
+        });
+        
+        // Função para mostrar status de carregamento
+        function mostrarStatusCarregamento(mensagem) {
+            const statusDiv = document.getElementById('statusCarregamento') || criarStatusDiv();
+            statusDiv.innerHTML = `<div class="loading"><span class="spinner"></span> ${mensagem}</div>`;
+            statusDiv.style.display = 'block';
+        }
+        
+        function ocultarStatusCarregamento() {
+            const statusDiv = document.getElementById('statusCarregamento');
+            if (statusDiv) {
+                statusDiv.style.display = 'none';
+            }
+        }
+        
+        function criarStatusDiv() {
+            const statusDiv = document.createElement('div');
+            statusDiv.id = 'statusCarregamento';
+            statusDiv.style.cssText = 'position: fixed; top: 20px; right: 20px; background: white; padding: 15px; border-radius: 5px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); z-index: 1000;';
+            document.body.appendChild(statusDiv);
+            return statusDiv;
         }
 
         // Cadastro de produto
@@ -200,20 +426,28 @@
             e.preventDefault();
             const formData = new FormData(e.target);
             const data = Object.fromEntries(formData);
+            const editId = e.target.dataset.editId;
             
             try {
-                const response = await fetch('/produtos', {
-                    method: 'POST',
+                const url = editId ? `/produtos/${editId}` : '/produtos';
+                const method = editId ? 'PUT' : 'POST';
+                
+                const response = await fetch(url, {
+                    method: method,
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(data)
                 });
                 
+                const result = await response.json();
+                
                 if (response.ok) {
-                    document.getElementById('msgProduto').innerHTML = '<div class="success">Produto cadastrado com sucesso!</div>';
+                    const msg = editId ? 'Produto atualizado com sucesso!' : 'Produto cadastrado com sucesso!';
+                    document.getElementById('msgProduto').innerHTML = `<div class="success">${msg}</div>`;
                     e.target.reset();
+                    delete e.target.dataset.editId;
                     carregarDados();
                 } else {
-                    document.getElementById('msgProduto').innerHTML = '<div class="error">Erro ao cadastrar produto</div>';
+                    document.getElementById('msgProduto').innerHTML = `<div class="error">${result.error || 'Erro ao salvar produto'}</div>`;
                 }
             } catch (error) {
                 document.getElementById('msgProduto').innerHTML = '<div class="error">Erro de conexão</div>';
@@ -225,44 +459,62 @@
             e.preventDefault();
             const formData = new FormData(e.target);
             const data = Object.fromEntries(formData);
+            const editId = e.target.dataset.editId;
             
             try {
-                const response = await fetch('/estabelecimentos', {
-                    method: 'POST',
+                const url = editId ? `/estabelecimentos/${editId}` : '/estabelecimentos';
+                const method = editId ? 'PUT' : 'POST';
+                
+                const response = await fetch(url, {
+                    method: method,
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(data)
                 });
                 
+                const result = await response.json();
+                
                 if (response.ok) {
-                    document.getElementById('msgEstabelecimento').innerHTML = '<div class="success">Estabelecimento cadastrado com sucesso!</div>';
+                    const msg = editId ? 'Estabelecimento atualizado com sucesso!' : 'Estabelecimento cadastrado com sucesso!';
+                    document.getElementById('msgEstabelecimento').innerHTML = `<div class="success">${msg}</div>`;
                     e.target.reset();
+                    delete e.target.dataset.editId;
                     carregarDados();
                 } else {
-                    document.getElementById('msgEstabelecimento').innerHTML = '<div class="error">Erro ao cadastrar estabelecimento</div>';
+                    document.getElementById('msgEstabelecimento').innerHTML = `<div class="error">${result.error || 'Erro ao salvar estabelecimento'}</div>`;
                 }
             } catch (error) {
                 document.getElementById('msgEstabelecimento').innerHTML = '<div class="error">Erro de conexão</div>';
             }
         });
 
+
+
         // Cadastro de preço
         document.getElementById('formPreco').addEventListener('submit', async (e) => {
             e.preventDefault();
             const formData = new FormData(e.target);
             const data = Object.fromEntries(formData);
+            const editId = e.target.dataset.editId;
             
             try {
-                const response = await fetch('/precos', {
-                    method: 'POST',
+                const url = editId ? `/precos/${editId}` : '/precos';
+                const method = editId ? 'PUT' : 'POST';
+                
+                const response = await fetch(url, {
+                    method: method,
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(data)
                 });
                 
+                const result = await response.json();
+                
                 if (response.ok) {
-                    document.getElementById('msgPreco').innerHTML = '<div class="success">Preço cadastrado com sucesso!</div>';
+                    const msg = editId ? 'Preço atualizado com sucesso!' : 'Preço cadastrado com sucesso!';
+                    document.getElementById('msgPreco').innerHTML = `<div class="success">${msg}</div>`;
                     e.target.reset();
+                    delete e.target.dataset.editId;
                 } else {
-                    document.getElementById('msgPreco').innerHTML = '<div class="error">Erro ao cadastrar preço</div>';
+                    document.getElementById('msgPreco').innerHTML = `<div class="error">${result.error || 'Erro ao salvar preço'}</div>`;
                 }
             } catch (error) {
                 document.getElementById('msgPreco').innerHTML = '<div class="error">Erro de conexão</div>';
@@ -283,56 +535,43 @@
                 container.innerHTML = '';
                 return;
             }
+            
+            // Limpar busca ao trocar tipo
+            document.getElementById('busca').value = '';
 
             try {
-                const response = await fetch(`/${tipo}`);
-                dadosAtuais = await response.json();
-                
-                if (tipo === 'precos') {
-                    await carregarMaps();
-                }
-                
-                exibirListagem(dadosAtuais, tipo);
+                mostrarLoading(true);
+                await carregarListagemComBusca(tipo, '');
             } catch (error) {
-                container.innerHTML = '<div class="error">Erro ao carregar dados</div>';
+                console.error('Erro ao carregar listagem:', error);
+                container.innerHTML = '<div class="error">Erro ao carregar dados. Tente novamente.</div>';
+            } finally {
+                mostrarLoading(false);
             }
         }
 
-        // Carregar mapas de produtos e estabelecimentos
-        async function carregarMaps() {
-            try {
-                const [produtos, estabelecimentos] = await Promise.all([
-                    fetch('/produtos').then(r => r.json()),
-                    fetch('/estabelecimentos').then(r => r.json())
-                ]);
-                
-                produtosMap = {};
-                estabelecimentosMap = {};
-                
-                produtos.forEach(p => produtosMap[p.id] = p);
-                estabelecimentos.forEach(e => estabelecimentosMap[e.id] = e);
-            } catch (error) {
-                console.error('Erro ao carregar mapas:', error);
-            }
-        }
 
-        // Exibir listagem
-        function exibirListagem(dados, tipo) {
+
+        // Exibir listagem com highlights
+        function exibirListagem(dados, tipo, termoBusca = '') {
             const container = document.getElementById('listagemContainer');
             
             if (dados.length === 0) {
-                container.innerHTML = '<div class="no-data">Nenhum registro encontrado</div>';
+                const mensagem = termoBusca ? 
+                    `Nenhum resultado encontrado para "${termoBusca}"` : 
+                    'Nenhum registro encontrado';
+                container.innerHTML = `<div class="no-data">${mensagem}</div>`;
                 return;
             }
 
             let html = '<table><thead><tr>';
             
             if (tipo === 'produtos') {
-                html += '<th>ID</th><th>Código</th><th>Descrição</th><th>EAN</th>';
+                html += '<th>Código</th><th>Descrição</th><th>EAN</th><th>Ações</th>';
             } else if (tipo === 'estabelecimentos') {
-                html += '<th>ID</th><th>Nome</th><th>CNPJ</th>';
+                html += '<th>ID</th><th>Nome</th><th>CNPJ</th><th>Bairro</th><th>Cidade</th><th>Ações</th>';
             } else if (tipo === 'precos') {
-                html += '<th>ID</th><th>Produto</th><th>Estabelecimento</th><th>Preço</th><th>Data</th>';
+                html += '<th>ID</th><th>Produto</th><th>Estabelecimento</th><th>Preço</th><th>Data</th><th>Ações</th>';
             }
             
             html += '</tr></thead><tbody>';
@@ -340,14 +579,23 @@
             dados.forEach(item => {
                 html += '<tr>';
                 if (tipo === 'produtos') {
-                    html += `<td>${item.id}</td><td>${item.codigo}</td><td>${item.descricao}</td><td>${item.ean || ''}</td>`;
+                    const descricao = termoBusca ? highlightTermo(item.descricao, termoBusca) : item.descricao;
+                    const ean = termoBusca ? highlightTermo(item.ean || '', termoBusca) : (item.ean || '');
+                    html += `<td>${item.id}</td><td>${descricao}</td><td>${ean}</td>`;
+                    html += `<td><button onclick="editarItem('${tipo}', ${item.id})" style="background:#28a745;margin-right:5px;">Editar</button><button onclick="excluirItem('${tipo}', ${item.id})" style="background:#dc3545;">Excluir</button></td>`;
                 } else if (tipo === 'estabelecimentos') {
-                    html += `<td>${item.id}</td><td>${item.nome}</td><td>${item.cnpj || ''}</td>`;
+                    const nome = termoBusca ? highlightTermo(item.nome, termoBusca) : item.nome;
+                    const bairro = termoBusca ? highlightTermo(item.bairro, termoBusca) : item.bairro;
+                    const cidade = termoBusca ? highlightTermo(item.cidade, termoBusca) : item.cidade;
+                    html += `<td>${item.id}</td><td>${nome}</td><td>${item.cnpj || ''}</td><td>${bairro}</td><td>${cidade}</td>`;
+                    html += `<td><button onclick="editarItem('${tipo}', ${item.id})" style="background:#28a745;margin-right:5px;">Editar</button><button onclick="excluirItem('${tipo}', ${item.id})" style="background:#dc3545;">Excluir</button></td>`;
                 } else if (tipo === 'precos') {
-                    const produto = produtosMap[item.produto_id] || {};
-                    const estabelecimento = estabelecimentosMap[item.estabelecimento_id] || {};
                     const data = new Date(item.data_coleta).toLocaleString('pt-BR');
-                    html += `<td>${item.id}</td><td>${produto.codigo || ''} - ${produto.descricao || ''}</td><td>${estabelecimento.nome || ''}</td><td>R$ ${item.preco.toFixed(2)}</td><td>${data}</td>`;
+                    const produtoNome = termoBusca ? highlightTermo(item.produto.nome, termoBusca) : item.produto.nome;
+                    const estabelecimentoNome = termoBusca ? highlightTermo(item.estabelecimento.nome, termoBusca) : item.estabelecimento.nome;
+                    const bairro = termoBusca ? highlightTermo(item.estabelecimento.bairro, termoBusca) : item.estabelecimento.bairro;
+                    html += `<td>${item.id}</td><td>${produtoNome}</td><td>${estabelecimentoNome} - ${bairro}</td><td>R$ ${item.preco.toFixed(2)}</td><td>${data}</td>`;
+                    html += `<td><button onclick="editarItem('${tipo}', ${item.id})" style="background:#28a745;margin-right:5px;">Editar</button><button onclick="excluirItem('${tipo}', ${item.id})" style="background:#dc3545;">Excluir</button></td>`;
                 }
                 html += '</tr>';
             });
@@ -356,41 +604,216 @@
             container.innerHTML = html;
         }
 
-        // Filtrar listagem
+        // Variáveis para debounce e loading
+        let timeoutBusca = null;
+        let isLoading = false;
+        
+        // Função para highlight de termos
+        function highlightTermo(texto, termo) {
+            if (!termo || !texto) return texto;
+            const regex = new RegExp(`(${termo})`, 'gi');
+            return texto.replace(regex, '<mark>$1</mark>');
+        }
+        
+        // Função para mostrar loading
+        function mostrarLoading(mostrar = true) {
+            const container = document.getElementById('listagemContainer');
+            if (mostrar && !isLoading) {
+                container.innerHTML = '<div class="loading"><span class="spinner"></span> Buscando...</div>';
+                isLoading = true;
+            } else if (!mostrar) {
+                isLoading = false;
+            }
+        }
+        
+        // Filtrar listagem com debounce otimizado
         function filtrarListagem() {
-            const busca = document.getElementById('busca').value.toLowerCase();
+            const busca = document.getElementById('busca').value.trim();
             const tipo = document.getElementById('tipoBusca').value;
             
-            if (!tipo || !dadosAtuais.length) return;
+            if (!tipo) return;
             
+            // Limpar timeout anterior
+            if (timeoutBusca) {
+                clearTimeout(timeoutBusca);
+            }
+            
+            // Debounce de 200ms
+            timeoutBusca = setTimeout(async () => {
+                try {
+                    if (busca.length >= 2 || busca.length === 0) {
+                        mostrarLoading(true);
+                        await carregarListagemComBusca(tipo, busca);
+                    } else {
+                        // Para buscas muito curtas, filtra localmente
+                        filtrarLocal(busca, tipo);
+                    }
+                } catch (error) {
+                    console.error('Erro na busca:', error);
+                    document.getElementById('listagemContainer').innerHTML = 
+                        '<div class="error">Erro na busca. Tente novamente.</div>';
+                } finally {
+                    mostrarLoading(false);
+                }
+            }, 200);
+        }
+        
+        // Busca local para termos curtos
+        function filtrarLocal(busca, tipo) {
+            const buscaLower = busca.toLowerCase();
             let dadosFiltrados = dadosAtuais;
             
             if (busca) {
                 dadosFiltrados = dadosAtuais.filter(item => {
                     if (tipo === 'produtos') {
-                        return item.codigo.toLowerCase().includes(busca) || 
-                               item.descricao.toLowerCase().includes(busca) ||
-                               (item.ean && item.ean.toLowerCase().includes(busca));
+                        return item.id.toString().includes(buscaLower) || 
+                               item.descricao.toLowerCase().includes(buscaLower) ||
+                               (item.ean && item.ean.toLowerCase().includes(buscaLower));
                     } else if (tipo === 'estabelecimentos') {
-                        return item.nome.toLowerCase().includes(busca) ||
-                               (item.cnpj && item.cnpj.toLowerCase().includes(busca));
+                        return item.nome.toLowerCase().includes(buscaLower) ||
+                               (item.cnpj && item.cnpj.toLowerCase().includes(buscaLower)) ||
+                               (item.bairro && item.bairro.toLowerCase().includes(buscaLower)) ||
+                               (item.cidade && item.cidade.toLowerCase().includes(buscaLower));
                     } else if (tipo === 'precos') {
-                        const produto = produtosMap[item.produto_id] || {};
-                        const estabelecimento = estabelecimentosMap[item.estabelecimento_id] || {};
-                        return (produto.codigo && produto.codigo.toLowerCase().includes(busca)) ||
-                               (produto.descricao && produto.descricao.toLowerCase().includes(busca)) ||
-                               (estabelecimento.nome && estabelecimento.nome.toLowerCase().includes(busca)) ||
-                               item.preco.toString().includes(busca);
+                        return item.id.toString().includes(buscaLower) ||
+                               item.produto.nome.toLowerCase().includes(buscaLower) ||
+                               item.estabelecimento.nome.toLowerCase().includes(buscaLower) ||
+                               item.estabelecimento.bairro.toLowerCase().includes(buscaLower) ||
+                               item.preco.toString().includes(buscaLower);
                     }
                     return false;
                 });
             }
             
-            exibirListagem(dadosFiltrados, tipo);
+            exibirListagem(dadosFiltrados, tipo, busca);
+        }
+        
+        // Carregar listagem com busca no servidor
+        async function carregarListagemComBusca(tipo, busca) {
+            try {
+                let url;
+                if (tipo === 'precos') {
+                    url = `/precos/detalhados?per_page=50${busca ? `&q=${encodeURIComponent(busca)}` : ''}`;
+                } else {
+                    url = `/${tipo}${busca ? `?q=${encodeURIComponent(busca)}` : ''}`;
+                }
+                
+                const response = await fetch(url);
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                
+                if (tipo === 'precos') {
+                    const data = await response.json();
+                    dadosAtuais = data.precos || [];
+                } else {
+                    dadosAtuais = await response.json();
+                }
+                
+                exibirListagem(dadosAtuais, tipo, busca);
+            } catch (error) {
+                throw error;
+            }
         }
 
-        // Carregar dados ao inicializar
-        carregarDados();
+        // Funções de edição e exclusão
+        async function editarItem(tipo, id) {
+            try {
+                let response, dados, item;
+                
+                if (tipo === 'precos') {
+                    // Para preços, buscar dados básicos para edição
+                    response = await fetch('/precos');
+                    const data = await response.json();
+                    dados = data.precos || data;
+                    item = dados.find(d => d.id == id);
+                } else {
+                    response = await fetch(`/${tipo}`);
+                    dados = await response.json();
+                    item = dados.find(d => d.id == id);
+                }
+                
+                if (!item) {
+                    alert('Item não encontrado');
+                    return;
+                }
+                
+                if (tipo === 'produtos') {
+                    document.getElementById('descricao').value = item.descricao;
+                    document.getElementById('ean').value = item.ean || '';
+                    document.getElementById('formProduto').dataset.editId = id;
+                    showSection('produtos');
+                } else if (tipo === 'estabelecimentos') {
+                    document.getElementById('nome').value = item.nome;
+                    document.getElementById('cnpj').value = item.cnpj || '';
+                    document.getElementById('bairro').value = item.bairro || '';
+                    document.getElementById('cidade').value = item.cidade || '';
+                    document.getElementById('formEstabelecimento').dataset.editId = id;
+                    showSection('estabelecimentos');
+                } else if (tipo === 'precos') {
+                    document.getElementById('produto_id').value = item.produto_id;
+                    document.getElementById('estabelecimento_id').value = item.estabelecimento_id;
+                    document.getElementById('preco').value = item.preco;
+                    document.getElementById('formPreco').dataset.editId = id;
+                    showSection('precos');
+                }
+            } catch (error) {
+                console.error('Erro:', error);
+                alert('Erro ao carregar dados para edição');
+            }
+        }
+        
+        async function excluirItem(tipo, id) {
+            if (!confirm('Tem certeza que deseja excluir este item?')) return;
+            
+            try {
+                const response = await fetch(`/${tipo}/${id}`, { method: 'DELETE' });
+                if (response.ok) {
+                    alert('Item excluído com sucesso!');
+                    carregarListagem();
+                } else {
+                    alert('Erro ao excluir item');
+                }
+            } catch (error) {
+                alert('Erro de conexão');
+            }
+        }
+        
+        // Limpar formulários ao trocar de seção
+        function limparFormularios() {
+            document.querySelectorAll('form').forEach(form => {
+                form.reset();
+                delete form.dataset.editId;
+                form.querySelectorAll('.success, .error').forEach(msg => msg.remove());
+            });
+        }
+        
+        // Carregar dados ao inicializar com retry
+        async function inicializarApp() {
+            let tentativas = 0;
+            const maxTentativas = 3;
+            
+            while (tentativas < maxTentativas) {
+                try {
+                    mostrarStatusCarregamento(`Carregando dados... (tentativa ${tentativas + 1}/${maxTentativas})`);
+                    await carregarDados();
+                    break; // Sucesso, sair do loop
+                } catch (error) {
+                    tentativas++;
+                    console.log(`Tentativa ${tentativas} falhou, tentando novamente em 2s...`);
+                    
+                    if (tentativas < maxTentativas) {
+                        mostrarStatusCarregamento(`Erro na conexão. Tentando novamente em 2s... (${tentativas}/${maxTentativas})`);
+                        await new Promise(resolve => setTimeout(resolve, 2000));
+                    } else {
+                        console.error('Falha ao carregar dados após 3 tentativas');
+                        mostrarStatusCarregamento('Erro: Não foi possível carregar os dados. Verifique se o servidor está rodando.');
+                    }
+                }
+            }
+        }
+        
+        inicializarApp();
     </script>
 </body>
 </html>

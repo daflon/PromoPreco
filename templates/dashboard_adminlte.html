@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>PromoPreço | Dashboard AdminLTE</title>
+
+    <!-- Google Font: Source Sans Pro -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- AdminLTE -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css">
+</head>
+<body class="hold-transition sidebar-mini layout-fixed">
+<div class="wrapper">
+
+    <!-- Preloader -->
+    <div class="preloader flex-column justify-content-center align-items-center">
+        <img class="animation__shake" src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjYwIiBoZWlnaHQ9IjYwIiByeD0iMTAiIGZpbGw9IiMzNDk4ZGIiLz4KPHRleHQgeD0iMzAiIHk9IjM1IiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMjQiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj7CpDwvdGV4dD4KPC9zdmc+" alt="PromoPreço" height="60" width="60">
+    </div>
+
+    <!-- Navbar -->
+    <nav class="main-header navbar navbar-expand navbar-white navbar-light">
+        <!-- Left navbar links -->
+        <ul class="navbar-nav">
+            <li class="nav-item">
+                <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
+            </li>
+            <li class="nav-item d-none d-sm-inline-block">
+                <a href="/" class="nav-link">Dashboard</a>
+            </li>
+            <li class="nav-item d-none d-sm-inline-block">
+                <a href="/cadastros" class="nav-link">Cadastros</a>
+            </li>
+            <li class="nav-item d-none d-sm-inline-block">
+                <a href="/relatorios" class="nav-link">Relatórios</a>
+            </li>
+        </ul>
+
+        <!-- Right navbar links -->
+        <ul class="navbar-nav ml-auto">
+            <li class="nav-item">
+                <a class="nav-link" data-widget="fullscreen" href="#" role="button">
+                    <i class="fas fa-expand-arrows-alt"></i>
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- Main Sidebar Container -->
+    <aside class="main-sidebar sidebar-dark-primary elevation-4">
+        <!-- Brand Logo -->
+        <a href="#" class="brand-link">
+            <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzMiIGhlaWdodD0iMzMiIHZpZXdCb3g9IjAgMCAzMyAzMyIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjMzIiBoZWlnaHQ9IjMzIiByeD0iNSIgZmlsbD0iIzM0OThkYiIvPgo8dGV4dCB4PSIxNi41IiB5PSIyMCIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjE0IiBmaWxsPSJ3aGl0ZSIgdGV4dC1hbmNob3I9Im1pZGRsZSI+wqQ8L3RleHQ+Cjwvc3ZnPg==" alt="PromoPreço Logo" class="brand-image img-circle elevation-3" style="opacity: .8">
+            <span class="brand-text font-weight-light">PromoPreço</span>
+        </a>
+
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <!-- Sidebar Menu -->
+            <nav class="mt-2">
+                <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+                    <li class="nav-item">
+                        <a href="/cadastros" class="nav-link">
+                            <i class="nav-icon fas fa-plus-circle"></i>
+                            <p>Cadastros</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link active" onclick="showDashboard()">
+                            <i class="nav-icon fas fa-tachometer-alt"></i>
+                            <p>Dashboard</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/relatorios" class="nav-link">
+                            <i class="nav-icon fas fa-file-alt"></i>
+                            <p>Relatórios</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" onclick="showComparison()">
+                            <i class="nav-icon fas fa-balance-scale"></i>
+                            <p>Comparar Preços</p>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </aside>
+
+    <!-- Content Wrapper -->
+    <div class="content-wrapper">
+        <!-- Content Header (Page header) -->
+        <div class="content-header">
+            <div class="container-fluid">
+                <div class="row mb-2">
+                    <div class="col-sm-6">
+                        <h1 class="m-0" id="page-title">Dashboard</h1>
+                    </div>
+                    <div class="col-sm-6">
+                        <ol class="breadcrumb float-sm-right">
+                            <li class="breadcrumb-item"><a href="#">Home</a></li>
+                            <li class="breadcrumb-item active" id="breadcrumb-active">Dashboard</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main content -->
+        <section class="content">
+            <div class="container-fluid">
+                
+                <!-- Dashboard Section -->
+                <div id="dashboard-section">
+                    <!-- Small boxes (Stat box) -->
+                    <div class="row" id="stats-row">
+                        <div class="col-lg-4 col-6">
+                            <div class="small-box bg-info">
+                                <div class="inner">
+                                    <h3 id="total-produtos">-</h3>
+                                    <p>Produtos Cadastrados</p>
+                                </div>
+                                <div class="icon">
+                                    <i class="fas fa-box"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-6">
+                            <div class="small-box bg-success">
+                                <div class="inner">
+                                    <h3 id="total-estabelecimentos">-</h3>
+                                    <p>Estabelecimentos</p>
+                                </div>
+                                <div class="icon">
+                                    <i class="fas fa-store"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-6">
+                            <div class="small-box bg-warning">
+                                <div class="inner">
+                                    <h3 id="total-precos">-</h3>
+                                    <p>Preços Registrados</p>
+                                </div>
+                                <div class="icon">
+                                    <i class="fas fa-tags"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Info boxes -->
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h3 class="card-title">
+                                        <i class="fas fa-chart-pie mr-1"></i>
+                                        Resumo do Sistema
+                                    </h3>
+                                </div>
+                                <div class="card-body" id="summary-content">
+                                    <div class="d-flex justify-content-center">
+                                        <div class="spinner-border" role="status">
+                                            <span class="sr-only">Carregando...</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Comparison Section -->
+                <div id="comparison-section" style="display: none;">
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h3 class="card-title">
+                                        <i class="fas fa-search mr-1"></i>
+                                        Buscar Produto
+                                    </h3>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="busca-produto">Buscar Produto</label>
+                                                <input type="text" class="form-control" id="busca-produto" placeholder="Digite para buscar produto..." autocomplete="off">
+                                                <small class="form-text text-muted">Apenas produtos com preços cadastrados são exibidos.</small>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label for="produto-select">Produto</label>
+                                                <select class="form-control" id="produto-select">
+                                                    <option value="">Selecione um produto...</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <div class="form-group">
+                                                <label>&nbsp;</label>
+                                                <button type="button" class="btn btn-primary btn-block" onclick="compararPrecos()">
+                                                    <i class="fas fa-balance-scale"></i> Comparar
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="card" id="comparison-card" style="display: none;">
+                                <div class="card-header">
+                                    <h3 class="card-title">
+                                        <i class="fas fa-chart-bar mr-1"></i>
+                                        Resultado da Comparação
+                                    </h3>
+                                </div>
+                                <div class="card-body" id="comparison-result">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+    </div>
+
+    <!-- Footer -->
+    <footer class="main-footer">
+        <strong>Copyright &copy; 2024 <a href="#">PromoPreço</a>.</strong>
+        Sistema de comparação de preços.
+        <div class="float-right d-none d-sm-inline-block">
+            <b>Versão</b> 1.0.0
+        </div>
+    </footer>
+</div>
+
+<!-- jQuery -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<!-- Bootstrap 4 -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+<!-- AdminLTE App -->
+<script src="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/js/adminlte.min.js"></script>
+
+<script>
+    let produtos = [];
+    let timeoutBuscaProduto = null;
+    
+    // Verificar status da API
+    async function verificarAPI() {
+        try {
+            const response = await fetch('/api');
+            if (response.ok) {
+                const data = await response.json();
+                console.log('API conectada com sucesso:', data);
+                
+                // Mostrar toast de sucesso
+                $(document).Toasts('create', {
+                    class: 'bg-success',
+                    title: 'Conexão',
+                    subtitle: 'API',
+                    body: 'Conectado ao servidor com sucesso',
+                    autohide: true,
+                    delay: 3000
+                });
+                
+                return true;
+            }
+            throw new Error('API não respondeu');
+        } catch (error) {
+            console.error('Erro de conexão com API:', error);
+            
+            // Mostrar toast de erro
+            $(document).Toasts('create', {
+                class: 'bg-danger',
+                title: 'Erro',
+                subtitle: 'Conexão',
+                body: 'Erro de conexão com o servidor',
+                autohide: true,
+                delay: 5000
+            });
+            
+            return false;
+        }
+    }
+    
+    // Carregar dados iniciais
+    $(document).ready(async function() {
+        console.log('Página carregada, verificando API...');
+        
+        const apiOk = await verificarAPI();
+        if (!apiOk) {
+            $('#stats-row').html('<div class="col-12"><div class="alert alert-danger"><i class="fas fa-exclamation-triangle"></i> Erro de conexão com a API. Verifique se o servidor Flask está rodando na porta 5000.</div></div>');
+            $('#summary-content').html('<div class="alert alert-danger">Sem conexão com o servidor</div>');
+            return;
+        }
+        
+        await carregarDashboard();
+        await carregarProdutos();
+    });
+    
+    function showDashboard() {
+        $('#dashboard-section').show();
+        $('#comparison-section').hide();
+        $('.nav-link.active').removeClass('active');
+        event.target.classList.add('active');
+        $('#page-title').text('Dashboard');
+        $('#breadcrumb-active').text('Dashboard');
+    }
+    
+    function showComparison() {
+        $('#dashboard-section').hide();
+        $('#comparison-section').show();
+        $('.nav-link.active').removeClass('active');
+        event.target.classList.add('active');
+        $('#page-title').text('Comparar Preços');
+        $('#breadcrumb-active').text('Comparar Preços');
+    }
+    
+    async function carregarDashboard() {
+        try {
+            console.log('Carregando dashboard...');
+            const response = await fetch('/dashboard/stats');
+            
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            
+            const data = await response.json();
+            console.log('Dados recebidos:', data);
+            
+            $('#total-produtos').text(data.total_produtos);
+            $('#total-estabelecimentos').text(data.total_estabelecimentos);
+            $('#total-precos').text(data.total_precos);
+            
+            $('#summary-content').html(`
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="info-box">
+                            <span class="info-box-icon bg-info"><i class="fas fa-box"></i></span>
+                            <div class="info-box-content">
+                                <span class="info-box-text">Produtos</span>
+                                <span class="info-box-number">${data.total_produtos}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="info-box">
+                            <span class="info-box-icon bg-success"><i class="fas fa-store"></i></span>
+                            <div class="info-box-content">
+                                <span class="info-box-text">Estabelecimentos</span>
+                                <span class="info-box-number">${data.total_estabelecimentos}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="info-box">
+                            <span class="info-box-icon bg-warning"><i class="fas fa-tags"></i></span>
+                            <div class="info-box-content">
+                                <span class="info-box-text">Preços</span>
+                                <span class="info-box-number">${data.total_precos}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `);
+            
+            console.log('Dashboard carregado com sucesso');
+        } catch (error) {
+            console.error('Erro ao carregar dashboard:', error);
+            $('#stats-row').html(`<div class="col-12"><div class="alert alert-danger">Erro ao carregar dados: ${error.message}</div></div>`);
+            $('#summary-content').html(`<div class="alert alert-danger">Erro ao carregar resumo: ${error.message}</div>`);
+        }
+    }
+    
+    async function carregarProdutos() {
+        try {
+            console.log('Carregando produtos com preços...');
+            const response = await fetch('/produtos/com-precos');
+            
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            
+            produtos = await response.json();
+            console.log(`${produtos.length} produtos com preços carregados`);
+            
+            atualizarSelectProdutos(produtos);
+            
+            // Configurar busca de produtos
+            $('#busca-produto').on('input', function() {
+                const termo = $(this).val().trim();
+                
+                if (timeoutBuscaProduto) {
+                    clearTimeout(timeoutBuscaProduto);
+                }
+                
+                timeoutBuscaProduto = setTimeout(() => {
+                    buscarProdutos(termo);
+                }, 300);
+            });
+            
+        } catch (error) {
+            console.error('Erro ao carregar produtos:', error);
+            $('#produto-select').html(`<option value="">Erro ao carregar produtos: ${error.message}</option>`);
+        }
+    }
+    
+    async function buscarProdutos(termo) {
+        if (!termo || termo.length < 2) {
+            atualizarSelectProdutos(produtos, false);
+            return;
+        }
+        
+        try {
+            const response = await fetch(`/produtos/com-precos?q=${encodeURIComponent(termo)}`);
+            if (response.ok) {
+                const produtosFiltrados = await response.json();
+                atualizarSelectProdutos(produtosFiltrados, true);
+            } else {
+                console.error('Erro na busca de produtos');
+            }
+        } catch (error) {
+            console.error('Erro na busca:', error);
+            const produtosFiltrados = produtos.filter(p => 
+                p.descricao.toLowerCase().includes(termo.toLowerCase()) ||
+                (p.ean && p.ean.includes(termo))
+            );
+            atualizarSelectProdutos(produtosFiltrados, true);
+        }
+    }
+    
+    function atualizarSelectProdutos(produtosList, autoSelect = false) {
+        const select = $('#produto-select');
+        const valorAtual = select.val();
+        
+        select.html('<option value="">Selecione um produto...</option>');
+        
+        produtosList.forEach(produto => {
+            select.append(`<option value="${produto.id}">${produto.id} - ${produto.descricao}</option>`);
+        });
+        
+        if (autoSelect && produtosList.length > 0) {
+            select.val(produtosList[0].id);
+            select.addClass('is-valid');
+            
+            if (produtosList.length === 1) {
+                setTimeout(() => {
+                    compararPrecos();
+                }, 1000);
+            }
+            
+            setTimeout(() => {
+                select.removeClass('is-valid');
+            }, 2000);
+        } else if (valorAtual && produtosList.find(p => p.id == valorAtual)) {
+            select.val(valorAtual);
+        }
+        
+        if (autoSelect) {
+            $('#busca-produto').attr('placeholder', `${produtosList.length} produto(s) encontrado(s)`);
+            setTimeout(() => {
+                $('#busca-produto').attr('placeholder', 'Digite para buscar produto...');
+            }, 3000);
+        }
+    }
+    
+    async function compararPrecos() {
+        const produtoId = $('#produto-select').val();
+        const resultDiv = $('#comparison-result');
+        const card = $('#comparison-card');
+        
+        if (!produtoId) {
+            $(document).Toasts('create', {
+                class: 'bg-warning',
+                title: 'Atenção',
+                body: 'Selecione um produto para comparar',
+                autohide: true,
+                delay: 3000
+            });
+            return;
+        }
+        
+        card.show();
+        resultDiv.html('<div class="d-flex justify-content-center"><div class="spinner-border" role="status"><span class="sr-only">Carregando...</span></div></div>');
+        
+        try {
+            console.log(`Comparando preços para produto ${produtoId}`);
+            const response = await fetch(`/comparar/${produtoId}`);
+            
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            
+            const data = await response.json();
+            console.log('Dados de comparação:', data);
+            
+            if (data.precos.length === 0) {
+                resultDiv.html('<div class="alert alert-info"><i class="fas fa-info-circle"></i> Nenhum preço encontrado para este produto.</div>');
+                return;
+            }
+            
+            const precosOrdenados = data.precos.sort((a, b) => a.preco - b.preco);
+            
+            let html = `
+                <div class="row mb-3">
+                    <div class="col-12">
+                        <h5><i class="fas fa-box mr-2"></i>${data.produto.descricao}</h5>
+                        <p class="text-muted">Encontrados ${precosOrdenados.length} preços (ordenados do mais barato para o mais caro)</p>
+                    </div>
+                </div>
+            `;
+            
+            precosOrdenados.forEach((item, index) => {
+                const dataFormatada = new Date(item.data_coleta).toLocaleDateString('pt-BR');
+                const isFirst = index === 0;
+                const cardClass = isFirst ? 'border-success' : '';
+                const badgeClass = isFirst ? 'badge-success' : 'badge-secondary';
+                
+                html += `
+                    <div class="card mb-2 ${cardClass}">
+                        <div class="card-body">
+                            <div class="row align-items-center">
+                                <div class="col-md-6">
+                                    <h6 class="mb-1">
+                                        <i class="fas fa-store mr-1"></i>${item.estabelecimento.nome}
+                                        ${isFirst ? '<span class="badge badge-success ml-2"><i class="fas fa-trophy"></i> MELHOR PREÇO</span>' : ''}
+                                    </h6>
+                                    <small class="text-muted">
+                                        <i class="fas fa-map-marker-alt mr-1"></i>${item.estabelecimento.bairro} - ${dataFormatada}
+                                    </small>
+                                </div>
+                                <div class="col-md-6 text-right">
+                                    <h4 class="mb-0 ${isFirst ? 'text-success' : ''}">
+                                        R$ ${item.preco.toFixed(2)}
+                                    </h4>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            if (precosOrdenados.length > 1) {
+                const menorPreco = precosOrdenados[0].preco;
+                const maiorPreco = precosOrdenados[precosOrdenados.length - 1].preco;
+                const economia = maiorPreco - menorPreco;
+                
+                html += `
+                    <div class="card bg-light mt-3">
+                        <div class="card-header">
+                            <h6 class="mb-0"><i class="fas fa-chart-line mr-2"></i>Estatísticas</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="info-box bg-success">
+                                        <span class="info-box-icon"><i class="fas fa-arrow-down"></i></span>
+                                        <div class="info-box-content">
+                                            <span class="info-box-text">Menor Preço</span>
+                                            <span class="info-box-number">R$ ${menorPreco.toFixed(2)}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="info-box bg-danger">
+                                        <span class="info-box-icon"><i class="fas fa-arrow-up"></i></span>
+                                        <div class="info-box-content">
+                                            <span class="info-box-text">Maior Preço</span>
+                                            <span class="info-box-number">R$ ${maiorPreco.toFixed(2)}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="info-box bg-warning">
+                                        <span class="info-box-icon"><i class="fas fa-piggy-bank"></i></span>
+                                        <div class="info-box-content">
+                                            <span class="info-box-text">Economia</span>
+                                            <span class="info-box-number">R$ ${economia.toFixed(2)}</span>
+                                            <span class="progress-description">${((economia/maiorPreco)*100).toFixed(1)}%</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            resultDiv.html(html);
+            console.log('Comparação carregada com sucesso');
+        } catch (error) {
+            console.error('Erro ao comparar preços:', error);
+            resultDiv.html(`<div class="alert alert-danger"><i class="fas fa-exclamation-triangle"></i> Erro ao carregar comparação de preços: ${error.message}</div>`);
+        }
+    }
+</script>
+</body>
+</html>

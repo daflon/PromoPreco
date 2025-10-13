@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - PromoPreço</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f5f5f5; }
+        
+        .container { display: flex; min-height: 100vh; }
+        
+        .sidebar { width: 250px; background: #2c3e50; color: white; padding: 20px; }
+        .sidebar h2 { margin-bottom: 30px; color: #ecf0f1; }
+        .sidebar ul { list-style: none; }
+        .sidebar li { margin: 10px 0; }
+        .sidebar a { color: #bdc3c7; text-decoration: none; padding: 10px; display: block; border-radius: 5px; }
+        .sidebar a:hover, .sidebar a.active { background: #34495e; color: white; }
+        
+        .main { flex: 1; padding: 30px; }
+        .header { margin-bottom: 30px; }
+        .header h1 { color: #2c3e50; margin-bottom: 10px; }
+        
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 30px; }
+        .stat-card { background: white; padding: 25px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center; }
+        .stat-number { font-size: 2.5em; font-weight: bold; color: #3498db; margin-bottom: 10px; }
+        .stat-label { color: #7f8c8d; font-size: 1.1em; }
+        
+        .section { background: white; padding: 25px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        .section h3 { color: #2c3e50; margin-bottom: 20px; }
+        
+        .search-form { display: flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap; }
+        .search-form input, .search-form select { padding: 10px; border: 1px solid #ddd; border-radius: 5px; }
+        .search-form button { padding: 10px 20px; background: #3498db; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        .search-form button:hover { background: #2980b9; }
+        
+        #busca-produto {
+            background-color: #f8f9fa;
+            border: 2px solid #e9ecef;
+            transition: all 0.3s ease;
+        }
+        
+        #busca-produto:focus {
+            background-color: white;
+            border-color: #3498db;
+            box-shadow: 0 0 5px rgba(52, 152, 219, 0.3);
+            outline: none;
+        }
+        
+        .comparison-result { margin-top: 20px; }
+        .price-item { display: flex; justify-content: space-between; align-items: center; padding: 15px; border: 1px solid #eee; margin: 5px 0; border-radius: 5px; }
+        .price-item:first-child { background: #d5f4e6; border-color: #27ae60; }
+        .price-value { font-weight: bold; font-size: 1.2em; color: #27ae60; }
+        .establishment-info { color: #7f8c8d; }
+        
+        .loading { text-align: center; padding: 20px; color: #7f8c8d; }
+        
+        .stats-box {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            border-left: 4px solid #3498db;
+        }
+        
+        .stats-box h5 {
+            margin: 0 0 10px 0;
+            color: #2c3e50;
+        }
+        
+        .stats-box p {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <nav class="sidebar">
+            <h2>📊 PromoPreço</h2>
+            <ul>
+                <li><a href="#" onclick="showDashboard()" class="active">Dashboard</a></li>
+                <li><a href="#" onclick="showComparison()">Comparar Preços</a></li>
+                <li><a href="/">Cadastros</a></li>
+            </ul>
+        </nav>
+        
+        <main class="main">
+            <div id="dashboard-section">
+                <div class="header">
+                    <h1>Dashboard</h1>
+                    <p>Visão geral do sistema PromoPreço</p>
+                    <div id="api-status" style="margin-top: 10px; padding: 5px; border-radius: 3px; font-size: 0.9em;"></div>
+                </div>
+                
+                <div class="stats-grid" id="stats-grid">
+                    <div class="loading">Carregando estatísticas...</div>
+                </div>
+                
+                <div class="section">
+                    <h3>📈 Resumo do Sistema</h3>
+                    <div id="summary-content">
+                        <div class="loading">Carregando resumo...</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="comparison-section" style="display: none;">
+                <div class="header">
+                    <h1>Comparar Preços</h1>
+                    <p>Compare preços de um produto em diferentes estabelecimentos</p>
+                </div>
+                
+                <div class="section">
+                    <h3>🔍 Buscar Produto</h3>
+                    <p style="color: #7f8c8d; margin-bottom: 15px; font-size: 0.9em;">Busque e compare preços de produtos. Apenas produtos com preços cadastrados são exibidos.</p>
+                    <div class="search-form">
+                        <input type="text" id="busca-produto" placeholder="Digite para buscar produto..." autocomplete="off" style="flex: 1; min-width: 300px;">
+                        <select id="produto-select" style="flex: 1; min-width: 200px;">
+                            <option value="">Selecione um produto...</option>
+                        </select>
+                        <button onclick="compararPrecos()">Comparar</button>
+                    </div>
+                    
+                    <div id="comparison-result" class="comparison-result"></div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        let produtos = [];
+        let timeoutBuscaProduto = null;
+        
+        // Verificar status da API
+        async function verificarAPI() {
+            const statusDiv = document.getElementById('api-status');
+            try {
+                statusDiv.innerHTML = '🔄 Verificando conexão...';
+                statusDiv.style.background = '#fff3cd';
+                statusDiv.style.color = '#856404';
+                
+                const response = await fetch('/api');
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('API conectada com sucesso:', data);
+                    
+                    statusDiv.innerHTML = '✅ Conectado ao servidor';
+                    statusDiv.style.background = '#d4edda';
+                    statusDiv.style.color = '#155724';
+                    
+                    setTimeout(() => {
+                        statusDiv.style.display = 'none';
+                    }, 3000);
+                    
+                    return true;
+                }
+                throw new Error('API não respondeu');
+            } catch (error) {
+                console.error('Erro de conexão com API:', error);
+                
+                statusDiv.innerHTML = '❌ Erro de conexão com o servidor';
+                statusDiv.style.background = '#f8d7da';
+                statusDiv.style.color = '#721c24';
+                
+                return false;
+            }
+        }
+        
+        // Carregar dados iniciais
+        document.addEventListener('DOMContentLoaded', async function() {
+            console.log('Página carregada, verificando API...');
+            
+            const apiOk = await verificarAPI();
+            if (!apiOk) {
+                document.getElementById('stats-grid').innerHTML = '<div class="loading">❌ Erro de conexão com a API. Verifique se o servidor Flask está rodando na porta 5000.</div>';
+                document.getElementById('summary-content').innerHTML = '<div class="loading">❌ Sem conexão com o servidor</div>';
+                return;
+            }
+            
+            carregarDashboard();
+            carregarProdutos();
+        });
+        
+        function showDashboard() {
+            document.getElementById('dashboard-section').style.display = 'block';
+            document.getElementById('comparison-section').style.display = 'none';
+            document.querySelector('.sidebar a.active').classList.remove('active');
+            event.target.classList.add('active');
+        }
+        
+        function showComparison() {
+            document.getElementById('dashboard-section').style.display = 'none';
+            document.getElementById('comparison-section').style.display = 'block';
+            document.querySelector('.sidebar a.active').classList.remove('active');
+            event.target.classList.add('active');
+        }
+        
+        async function carregarDashboard() {
+            try {
+                console.log('Carregando dashboard...');
+                const response = await fetch('/dashboard/stats');
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                console.log('Dados recebidos:', data);
+                
+                const statsGrid = document.getElementById('stats-grid');
+                statsGrid.innerHTML = `
+                    <div class="stat-card">
+                        <div class="stat-number">${data.total_produtos}</div>
+                        <div class="stat-label">Produtos Cadastrados</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">${data.total_estabelecimentos}</div>
+                        <div class="stat-label">Estabelecimentos</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">${data.total_precos}</div>
+                        <div class="stat-label">Preços Registrados</div>
+                    </div>
+                `;
+                
+                const summaryContent = document.getElementById('summary-content');
+                summaryContent.innerHTML = `
+                    <p><strong>Total de produtos:</strong> ${data.total_produtos}</p>
+                    <p><strong>Total de estabelecimentos:</strong> ${data.total_estabelecimentos}</p>
+                    <p><strong>Total de preços:</strong> ${data.total_precos}</p>
+                `;
+                
+                console.log('Dashboard carregado com sucesso');
+            } catch (error) {
+                console.error('Erro ao carregar dashboard:', error);
+                const statsGrid = document.getElementById('stats-grid');
+                const summaryContent = document.getElementById('summary-content');
+                
+                statsGrid.innerHTML = `<div class="loading">Erro ao carregar dados: ${error.message}</div>`;
+                summaryContent.innerHTML = `<div class="loading">Erro ao carregar resumo: ${error.message}</div>`;
+            }
+        }
+        
+        async function carregarProdutos() {
+            try {
+                console.log('Carregando produtos com preços...');
+                const response = await fetch('/produtos/com-precos');
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                produtos = await response.json();
+                console.log(`${produtos.length} produtos com preços carregados`);
+                
+                atualizarSelectProdutos(produtos);
+                
+                // Configurar busca de produtos
+                const buscaProduto = document.getElementById('busca-produto');
+                buscaProduto.addEventListener('input', function(e) {
+                    const termo = e.target.value.trim();
+                    
+                    if (timeoutBuscaProduto) {
+                        clearTimeout(timeoutBuscaProduto);
+                    }
+                    
+                    timeoutBuscaProduto = setTimeout(() => {
+                        buscarProdutos(termo);
+                    }, 300);
+                });
+                
+            } catch (error) {
+                console.error('Erro ao carregar produtos:', error);
+                const select = document.getElementById('produto-select');
+                select.innerHTML = `<option value="">Erro ao carregar produtos: ${error.message}</option>`;
+            }
+        }
+        
+        // Busca de produtos com fuzzy search (apenas produtos com preços)
+        async function buscarProdutos(termo) {
+            if (!termo || termo.length < 2) {
+                atualizarSelectProdutos(produtos, false);
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/produtos/com-precos?q=${encodeURIComponent(termo)}`);
+                if (response.ok) {
+                    const produtosFiltrados = await response.json();
+                    atualizarSelectProdutos(produtosFiltrados, true);
+                } else {
+                    console.error('Erro na busca de produtos');
+                }
+            } catch (error) {
+                console.error('Erro na busca:', error);
+                // Em caso de erro, filtra localmente
+                const produtosFiltrados = produtos.filter(p => 
+                    p.descricao.toLowerCase().includes(termo.toLowerCase()) ||
+                    (p.ean && p.ean.includes(termo))
+                );
+                atualizarSelectProdutos(produtosFiltrados, true);
+            }
+        }
+        
+        // Atualizar select de produtos com resultados da busca
+        function atualizarSelectProdutos(produtosList, autoSelect = false) {
+            const select = document.getElementById('produto-select');
+            const valorAtual = select.value;
+            
+            select.innerHTML = '<option value="">Selecione um produto...</option>';
+            
+            produtosList.forEach(produto => {
+                const option = document.createElement('option');
+                option.value = produto.id;
+                option.textContent = `${produto.id} - ${produto.descricao}`;
+                select.appendChild(option);
+            });
+            
+            // Auto-selecionar primeiro produto se for resultado de busca
+            if (autoSelect && produtosList.length > 0) {
+                select.value = produtosList[0].id;
+                // Destacar visualmente que foi auto-selecionado
+                select.style.borderColor = '#27ae60';
+                select.style.backgroundColor = '#d5f4e6';
+                
+                // Se há apenas um resultado, comparar automaticamente após 1 segundo
+                if (produtosList.length === 1) {
+                    setTimeout(() => {
+                        compararPrecos();
+                    }, 1000);
+                }
+                
+                setTimeout(() => {
+                    select.style.borderColor = '';
+                    select.style.backgroundColor = '';
+                }, 2000);
+            } else if (valorAtual && produtosList.find(p => p.id == valorAtual)) {
+                // Restaurar valor se ainda existir
+                select.value = valorAtual;
+            }
+            
+            // Mostrar contador de resultados
+            const buscaProduto = document.getElementById('busca-produto');
+            if (autoSelect) {
+                buscaProduto.placeholder = `${produtosList.length} produto(s) encontrado(s)`;
+                setTimeout(() => {
+                    buscaProduto.placeholder = 'Digite para buscar produto...';
+                }, 3000);
+            }
+        }
+        
+        async function compararPrecos() {
+            const produtoId = document.getElementById('produto-select').value;
+            const resultDiv = document.getElementById('comparison-result');
+            
+            if (!produtoId) {
+                alert('Selecione um produto para comparar');
+                return;
+            }
+            
+            resultDiv.innerHTML = '<div class="loading">Carregando comparação...</div>';
+            
+            try {
+                console.log(`Comparando preços para produto ${produtoId}`);
+                const response = await fetch(`/comparar/${produtoId}`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                console.log('Dados de comparação:', data);
+                
+                if (data.precos.length === 0) {
+                    resultDiv.innerHTML = '<p>Nenhum preço encontrado para este produto.</p>';
+                    return;
+                }
+                
+                // Ordenar preços do mais barato para o mais caro
+                const precosOrdenados = data.precos.sort((a, b) => a.preco - b.preco);
+                
+                let html = `<h4>Preços para: ${data.produto.descricao}</h4>`;
+                html += `<p style="color: #7f8c8d; margin-bottom: 15px;">Encontrados ${precosOrdenados.length} preços (ordenados do mais barato para o mais caro)</p>`;
+                
+                precosOrdenados.forEach((item, index) => {
+                    const dataFormatada = new Date(item.data_coleta).toLocaleDateString('pt-BR');
+                    const isFirst = index === 0;
+                    const priceItemClass = isFirst ? 'price-item' : 'price-item';
+                    
+                    html += `
+                        <div class="${priceItemClass}" ${isFirst ? 'style="background: #d5f4e6; border-color: #27ae60;"' : ''}>
+                            <div>
+                                <strong>${item.estabelecimento.nome}</strong>
+                                ${isFirst ? '<span style="color: #27ae60; font-weight: bold; margin-left: 10px;">💰 MELHOR PREÇO</span>' : ''}<br>
+                                <span class="establishment-info">${item.estabelecimento.bairro} - ${dataFormatada}</span>
+                            </div>
+                            <div class="price-value" ${isFirst ? 'style="color: #27ae60; font-size: 1.3em;"' : ''}>R$ ${item.preco.toFixed(2)}</div>
+                        </div>
+                    `;
+                });
+                
+                // Adicionar estatísticas
+                const menorPreco = precosOrdenados[0].preco;
+                const maiorPreco = precosOrdenados[precosOrdenados.length - 1].preco;
+                const economia = maiorPreco - menorPreco;
+                
+                if (precosOrdenados.length > 1) {
+                    html += `
+                        <div style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 5px; border-left: 4px solid #3498db;">
+                            <h5 style="margin: 0 0 10px 0; color: #2c3e50;">📊 Estatísticas</h5>
+                            <p style="margin: 5px 0;"><strong>Menor preço:</strong> R$ ${menorPreco.toFixed(2)}</p>
+                            <p style="margin: 5px 0;"><strong>Maior preço:</strong> R$ ${maiorPreco.toFixed(2)}</p>
+                            <p style="margin: 5px 0; color: #27ae60;"><strong>Economia máxima:</strong> R$ ${economia.toFixed(2)} (${((economia/maiorPreco)*100).toFixed(1)}%)</p>
+                        </div>
+                    `;
+                }
+                
+                resultDiv.innerHTML = html;
+                console.log('Comparação carregada com sucesso');
+            } catch (error) {
+                console.error('Erro ao comparar preços:', error);
+                resultDiv.innerHTML = `<p>Erro ao carregar comparação de preços: ${error.message}</p>`;
+            }
+        }
+    </script>
+</body>
+</html>

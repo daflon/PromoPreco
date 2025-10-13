@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relatórios - PromoPreço</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <nav class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
+                <div class="position-sticky pt-3">
+                    <h5 class="text-center mb-3">PromoPreço</h5>
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link" href="/">
+                                <i class="fas fa-plus-circle"></i> Cadastros
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/dashboard">
+                                <i class="fas fa-chart-bar"></i> Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link active" href="/relatorios">
+                                <i class="fas fa-file-alt"></i> Relatórios
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+
+            <!-- Main content -->
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <h1 class="h2">Relatórios</h1>
+                </div>
+
+                <!-- Filtros -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5><i class="fas fa-filter"></i> Filtros</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <label class="form-label">Período (dias)</label>
+                                <select class="form-select" id="filtro-dias">
+                                    <option value="7">Últimos 7 dias</option>
+                                    <option value="15">Últimos 15 dias</option>
+                                    <option value="30" selected>Últimos 30 dias</option>
+                                    <option value="60">Últimos 60 dias</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Produto</label>
+                                <select class="form-select" id="filtro-produto">
+                                    <option value="">Todos os produtos</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Estabelecimento</label>
+                                <select class="form-select" id="filtro-estabelecimento">
+                                    <option value="">Todos os estabelecimentos</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3 d-flex align-items-end">
+                                <button class="btn btn-primary" onclick="atualizarRelatorio()">
+                                    <i class="fas fa-search"></i> Filtrar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Gráficos -->
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5><i class="fas fa-chart-bar"></i> Top Produtos</h5>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="grafico-produtos" height="200"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5><i class="fas fa-chart-line"></i> Variação de Preços</h5>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="grafico-variacao" height="200"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Exportação -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5><i class="fas fa-download"></i> Exportar Relatório</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="btn-group" role="group">
+                            <button class="btn btn-success" onclick="exportarRelatorio('csv')">
+                                <i class="fas fa-file-csv"></i> CSV
+                            </button>
+                            <button class="btn btn-primary" onclick="exportarRelatorio('excel')">
+                                <i class="fas fa-file-excel"></i> Excel
+                            </button>
+                            <button class="btn btn-danger" onclick="exportarRelatorio('pdf')">
+                                <i class="fas fa-file-pdf"></i> PDF
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Histórico de Preços -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5><i class="fas fa-history"></i> Histórico de Preços por Produto</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <select class="form-select" id="produto-historico">
+                                    <option value="">Selecione um produto</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <select class="form-select" id="dias-historico">
+                                    <option value="7">7 dias</option>
+                                    <option value="15">15 dias</option>
+                                    <option value="30" selected>30 dias</option>
+                                    <option value="60">60 dias</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <button class="btn btn-primary" onclick="carregarHistorico()">
+                                    <i class="fas fa-search"></i> Buscar
+                                </button>
+                            </div>
+                        </div>
+                        <div id="historico-container">
+                            <canvas id="grafico-historico" height="100"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tabela de Dados -->
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between">
+                        <h5><i class="fas fa-table"></i> Dados do Relatório</h5>
+                        <div class="btn-group btn-group-sm">
+                            <button class="btn btn-outline-secondary" onclick="ordenarTabela('produto')">
+                                <i class="fas fa-sort"></i> Produto
+                            </button>
+                            <button class="btn btn-outline-secondary" onclick="ordenarTabela('preco')">
+                                <i class="fas fa-sort"></i> Preço
+                            </button>
+                            <button class="btn btn-outline-secondary" onclick="ordenarTabela('data_coleta')">
+                                <i class="fas fa-sort"></i> Data
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped" id="tabela-relatorio">
+                                <thead>
+                                    <tr>
+                                        <th>Produto</th>
+                                        <th>EAN</th>
+                                        <th>Estabelecimento</th>
+                                        <th>Bairro</th>
+                                        <th>Preço</th>
+                                        <th>Data</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="dados-tabela">
+                                    <tr>
+                                        <td colspan="6" class="text-center">Carregando dados...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        let graficoProdutos, graficoVariacao, graficoHistorico;
+        let ordenacaoAtual = { campo: 'data_coleta', ordem: 'desc' };
+
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', function() {
+            carregarFiltros();
+            carregarEstatisticas();
+            atualizarRelatorio();
+        });
+
+        async function carregarFiltros() {
+            try {
+                // Carregar produtos
+                const produtosResp = await fetch('/produtos/com-precos');
+                const produtos = await produtosResp.json();
+                
+                const selectProduto = document.getElementById('filtro-produto');
+                const selectProdutoHistorico = document.getElementById('produto-historico');
+                
+                produtos.forEach(produto => {
+                    const option1 = new Option(produto.descricao, produto.id);
+                    const option2 = new Option(produto.descricao, produto.id);
+                    selectProduto.add(option1);
+                    selectProdutoHistorico.add(option2);
+                });
+
+                // Carregar estabelecimentos
+                const estabelecimentosResp = await fetch('/estabelecimentos');
+                const estabelecimentos = await estabelecimentosResp.json();
+                
+                const selectEstabelecimento = document.getElementById('filtro-estabelecimento');
+                estabelecimentos.forEach(est => {
+                    selectEstabelecimento.add(new Option(est.nome, est.id));
+                });
+            } catch (error) {
+                console.error('Erro ao carregar filtros:', error);
+            }
+        }
+
+        async function carregarEstatisticas() {
+            try {
+                const response = await fetch('/api/estatisticas-avancadas');
+                const stats = await response.json();
+
+                // Gráfico de produtos
+                const ctxProdutos = document.getElementById('grafico-produtos').getContext('2d');
+                if (graficoProdutos) graficoProdutos.destroy();
+                
+                graficoProdutos = new Chart(ctxProdutos, {
+                    type: 'bar',
+                    data: {
+                        labels: stats.top_produtos.map(p => p.produto.substring(0, 20) + '...'),
+                        datasets: [{
+                            label: 'Número de Preços',
+                            data: stats.top_produtos.map(p => p.total_precos),
+                            backgroundColor: 'rgba(54, 162, 235, 0.8)'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false
+                    }
+                });
+
+                // Gráfico de variação
+                const ctxVariacao = document.getElementById('grafico-variacao').getContext('2d');
+                if (graficoVariacao) graficoVariacao.destroy();
+                
+                graficoVariacao = new Chart(ctxVariacao, {
+                    type: 'line',
+                    data: {
+                        labels: stats.variacao_precos.map(v => {
+                            const data = new Date(v.data);
+                            return data.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+                        }),
+                        datasets: [{
+                            label: 'Preço Médio (R$)',
+                            data: stats.variacao_precos.map(v => v.preco_medio),
+                            borderColor: '#36A2EB',
+                            backgroundColor: 'rgba(54, 162, 235, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        }, {
+                            label: 'Qtd. Preços',
+                            data: stats.variacao_precos.map(v => v.total_precos),
+                            borderColor: '#FF6384',
+                            backgroundColor: 'rgba(255, 99, 132, 0.1)',
+                            tension: 0.4,
+                            yAxisID: 'y1'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        interaction: {
+                            mode: 'index',
+                            intersect: false
+                        },
+                        scales: {
+                            y: {
+                                type: 'linear',
+                                display: true,
+                                position: 'left',
+                                title: {
+                                    display: true,
+                                    text: 'Preço Médio (R$)'
+                                }
+                            },
+                            y1: {
+                                type: 'linear',
+                                display: true,
+                                position: 'right',
+                                title: {
+                                    display: true,
+                                    text: 'Quantidade de Preços'
+                                },
+                                grid: {
+                                    drawOnChartArea: false
+                                }
+                            }
+                        }
+                    }
+                });
+            } catch (error) {
+                console.error('Erro ao carregar estatísticas:', error);
+            }
+        }
+
+        async function atualizarRelatorio() {
+            const dias = document.getElementById('filtro-dias').value;
+            const produtoId = document.getElementById('filtro-produto').value;
+            const estabelecimentoId = document.getElementById('filtro-estabelecimento').value;
+
+            const params = new URLSearchParams({
+                dias: dias,
+                ordenar_por: ordenacaoAtual.campo,
+                ordem: ordenacaoAtual.ordem
+            });
+
+            if (produtoId) params.append('produto_id', produtoId);
+            if (estabelecimentoId) params.append('estabelecimento_id', estabelecimentoId);
+
+            try {
+                const response = await fetch(`/precos/ordenados?${params}`);
+                const data = await response.json();
+
+                const tbody = document.getElementById('dados-tabela');
+                tbody.innerHTML = '';
+
+                if (data.precos && data.precos.length > 0) {
+                    data.precos.forEach(item => {
+                        const row = tbody.insertRow();
+                        row.innerHTML = `
+                            <td>${item.produto.descricao}</td>
+                            <td>${item.produto.ean || '-'}</td>
+                            <td>${item.estabelecimento.nome}</td>
+                            <td>${item.estabelecimento.bairro}</td>
+                            <td>R$ ${item.preco.toFixed(2)}</td>
+                            <td>${new Date(item.data_coleta).toLocaleString('pt-BR')}</td>
+                        `;
+                    });
+                } else {
+                    tbody.innerHTML = '<tr><td colspan="6" class="text-center">Nenhum dado encontrado</td></tr>';
+                }
+            } catch (error) {
+                console.error('Erro ao atualizar relatório:', error);
+                document.getElementById('dados-tabela').innerHTML = 
+                    '<tr><td colspan="6" class="text-center text-danger">Erro ao carregar dados</td></tr>';
+            }
+        }
+
+        async function carregarHistorico() {
+            const produtoId = document.getElementById('produto-historico').value;
+            const dias = document.getElementById('dias-historico').value;
+
+            if (!produtoId) {
+                alert('Selecione um produto');
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/historico-precos/${produtoId}?dias=${dias}`);
+                const data = await response.json();
+
+                const ctx = document.getElementById('grafico-historico').getContext('2d');
+                if (graficoHistorico) graficoHistorico.destroy();
+
+                const dadosAgrupados = {};
+                data.historico.forEach(item => {
+                    const data = new Date(item.data_coleta).toLocaleDateString('pt-BR');
+                    if (!dadosAgrupados[data]) {
+                        dadosAgrupados[data] = [];
+                    }
+                    dadosAgrupados[data].push(item.preco);
+                });
+
+                const labels = Object.keys(dadosAgrupados).sort();
+                const precos = labels.map(data => {
+                    const precosData = dadosAgrupados[data];
+                    return precosData.reduce((a, b) => a + b, 0) / precosData.length;
+                });
+
+                graficoHistorico = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Preço Médio',
+                            data: precos,
+                            borderColor: 'rgba(75, 192, 192, 1)',
+                            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                            tension: 0.1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: false
+                            }
+                        }
+                    }
+                });
+            } catch (error) {
+                console.error('Erro ao carregar histórico:', error);
+            }
+        }
+
+        function ordenarTabela(campo) {
+            if (ordenacaoAtual.campo === campo) {
+                ordenacaoAtual.ordem = ordenacaoAtual.ordem === 'asc' ? 'desc' : 'asc';
+            } else {
+                ordenacaoAtual.campo = campo;
+                ordenacaoAtual.ordem = 'desc';
+            }
+            atualizarRelatorio();
+        }
+
+        function exportarRelatorio(formato) {
+            const dias = document.getElementById('filtro-dias').value;
+            const produtoId = document.getElementById('filtro-produto').value;
+            const estabelecimentoId = document.getElementById('filtro-estabelecimento').value;
+
+            const params = new URLSearchParams({
+                formato: formato,
+                dias: dias
+            });
+
+            if (produtoId) params.append('produto_id', produtoId);
+            if (estabelecimentoId) params.append('estabelecimento_id', estabelecimentoId);
+
+            window.open(`/api/relatorio-precos?${params}`, '_blank');
+        }
+    </script>
+</body>
+</html>
