@@ -1,0 +1,57 @@
+{% extends "base_adminlte.html" %}
+
+{% block title %}Exemplo{% endblock %}
+
+{% block page_title %}Página de Exemplo{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item active">Exemplo</li>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-info-circle"></i>
+                    Exemplo de Uso do Template Base
+                </h3>
+            </div>
+            <div class="card-body">
+                <p>Este é um exemplo de como usar o template base AdminLTE.</p>
+                <p>Todas as páginas podem herdar deste template base para manter consistência visual.</p>
+                
+                <div class="alert alert-info">
+                    <h5><i class="icon fas fa-info"></i> Informação!</h5>
+                    O template base já inclui:
+                    <ul>
+                        <li>Navbar com navegação</li>
+                        <li>Sidebar com menu</li>
+                        <li>Footer</li>
+                        <li>Scripts básicos (jQuery, Bootstrap, AdminLTE)</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<!-- CSS específico desta página -->
+<style>
+    .exemplo-custom {
+        color: #007bff;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<!-- JavaScript específico desta página -->
+<script>
+    $(document).ready(function() {
+        console.log('Página de exemplo carregada!');
+    });
+</script>
+{% endblock %}

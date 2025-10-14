@@ -93,7 +93,7 @@ def home():
 
 @app.route('/cadastros')
 def cadastros():
-    return render_template('cadastros.html')
+    return render_template('cadastros_adminlte.html')
 
 @app.route('/dashboard')
 def dashboard():
@@ -603,7 +603,7 @@ def comparar_com_busca():
 # Relatórios e Exportação
 @app.route('/relatorios')
 def relatorios():
-    return render_template('relatorios.html')
+    return render_template('relatorios_adminlte.html')
 
 @app.route('/api/historico-precos/<int:produto_id>')
 @limiter.limit("20 per minute")

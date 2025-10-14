@@ -12,9 +12,10 @@ O PromoPreço é uma aplicação web que permite cadastrar produtos, estabelecim
 - ✅ **CRUD Completo**: Criar, editar e excluir produtos, estabelecimentos e preços
 - ✅ **Validações**: CNPJ (14 dígitos), EAN (13 dígitos), preços > 0
 - ✅ **API REST**: Endpoints completos com PUT/DELETE
-- ✅ **Interface Responsiva**: Design adaptado para mobile
+- ✅ **Interface Moderna**: AdminLTE 3.x responsiva e profissional
+- ✅ **Múltiplas Interfaces**: AdminLTE (principal) + clássica (alternativa)
 - ✅ **Tratamento de Erros**: Respostas padronizadas e feedback visual
-- ✅ **Relatórios**: Exportação em PDF, Excel e CSV
+- ✅ **Sistema Completo de Relatórios**: Exportação em PDF, Excel e CSV
 
 ### Busca Inteligente 🆕
 - ✅ **Busca Fuzzy**: Tolerante a erros de digitação ("arrz" encontra "arroz")
@@ -24,23 +25,33 @@ O PromoPreço é uma aplicação web que permite cadastrar produtos, estabelecim
 - ✅ **Highlights**: Destaque visual dos termos encontrados
 - ✅ **Produtos com Preços**: Filtra apenas produtos que têm preços cadastrados
 
+### Interface AdminLTE 🆕
+- ✅ **Design Moderno**: AdminLTE 3.x com Bootstrap 4
+- ✅ **Menu Lateral**: Navegação colapsível com ícones FontAwesome
+- ✅ **Cards Modernos**: Layout em cards para melhor organização
+- ✅ **Responsividade Total**: Adaptado para mobile, tablet e desktop
+- ✅ **Consistência Visual**: Padrão profissional em todas as páginas
+
 ### Dashboard e Analytics
 - ✅ **Estatísticas**: Totais e rankings do sistema
 - ✅ **Comparação Inteligente**: Preços ordenados do mais barato ao mais caro
 - ✅ **Destaque do Melhor Preço**: Visual diferenciado para menor preço
 - ✅ **Estatísticas de Economia**: Valor e percentual de economia
 - ✅ **Performance**: Cache e rate limiting implementados
+- ✅ **Interface Dedicada**: Página de relatórios AdminLTE
 
 ## 🚀 Tecnologias
 
 - **Backend**: Flask + SQLAlchemy + RapidFuzz
 - **Banco de Dados**: SQLite
-- **Frontend**: HTML, CSS, JavaScript (Vanilla)
+- **Frontend**: AdminLTE 3.x + Bootstrap 4 + FontAwesome
+- **Interface**: HTML5, CSS3, JavaScript (Vanilla)
 - **API**: REST JSON
 - **Cache**: Flask-Caching (60s consultas, 30s preços)
 - **Rate Limiting**: Flask-Limiter (30 req/min buscas, 20 req/min preços)
 - **Busca**: RapidFuzz para busca fuzzy tolerante a erros
 - **Relatórios**: ReportLab (PDF), XlsxWriter (Excel), CSV nativo
+- **UI Framework**: AdminLTE para interface moderna e responsiva
 
 ## 📦 Instalação
 
@@ -120,7 +131,14 @@ http://localhost:5000
 ## 🔧 Uso
 
 ### Interface Web
-Acesse `http://localhost:5000` para usar a interface de cadastros.
+Acesse `http://localhost:5000` para a interface principal AdminLTE.
+
+**Interfaces disponíveis:**
+- `/` - Dashboard AdminLTE (principal)
+- `/cadastros` - Cadastros AdminLTE
+- `/relatorios` - Relatórios AdminLTE
+- `/dashboard` - Dashboard clássico (alternativo)
+- `/dashboard/adminlte` - Dashboard AdminLTE (alternativo)
 
 ### API Endpoints
 
@@ -208,17 +226,23 @@ Acesse `http://localhost:5000` para usar a interface de cadastros.
 
 ```
 PromoPreço/
-├── app.py              # Aplicação Flask + SQLAlchemy + Validações
-├── requirements.txt    # Dependências Python
-├── templates/          # Templates HTML
-│   └── cadastros.html  # Interface responsiva com CRUD
-├── instance/           # Dados da aplicação
-│   └── promoprecco.db  # Banco SQLite
-├── .amazonq/rules/     # Regras do projeto
-├── reset_db.py        # Reset do banco de dados
-├── force_reset.py     # Reset forçado
-├── ROADMAP.md         # Roadmap do projeto
-└── README.md          # Este arquivo
+├── app.py                    # Aplicação Flask + AdminLTE + Relatórios
+├── requirements.txt          # Dependências Python
+├── templates/                # Templates HTML
+│   ├── base_adminlte.html    # Template base AdminLTE
+│   ├── cadastros_adminlte.html # Cadastros AdminLTE
+│   ├── dashboard_adminlte.html # Dashboard AdminLTE
+│   ├── relatorios_adminlte.html # Relatórios AdminLTE
+│   ├── cadastros.html        # Interface clássica
+│   ├── dashboard.html        # Dashboard clássico
+│   └── relatorios.html       # Relatórios clássicos
+├── Testes/                   # Scripts de teste
+├── instance/                 # Dados da aplicação
+│   └── promoprecco.db        # Banco SQLite
+├── .amazonq/rules/           # Regras do projeto
+├── ADMINLTE_GUIDE.md         # Guia do AdminLTE
+├── ROADMAP.md               # Roadmap do projeto
+└── README.md                # Este arquivo
 ```
 
 ## 🗄️ Modelo de Dados
@@ -439,7 +463,15 @@ GET /api/estatisticas-avancadas
 
 ## ✨ Melhorias Recentes
 
-### Funcionalidades Implementadas
+### Interface AdminLTE (Mais Recente) 🆕
+- **AdminLTE 3.x**: Interface moderna e profissional implementada
+- **Múltiplas Interfaces**: Suporte a AdminLTE e interface clássica
+- **Design Responsivo**: Totalmente adaptado para todos os dispositivos
+- **Menu Lateral**: Navegação colapsível com ícones FontAwesome
+- **Cards Modernos**: Layout organizado em cards para melhor UX
+- **Consistência Visual**: Padrão profissional em todas as páginas
+
+### Funcionalidades Core Implementadas
 - **Busca Fuzzy**: Implementada com RapidFuzz para tolerância a erros
 - **Auto-seleção**: Primeiro resultado selecionado automaticamente
 - **Comparação Automática**: Para buscas com resultado único
@@ -447,7 +479,7 @@ GET /api/estatisticas-avancadas
 - **Performance**: Cache inteligente e rate limiting
 - **UX Melhorada**: Feedback visual, highlights e animações
 - **Dashboard Inteligente**: Ordenação automática e estatísticas de economia
-- **Relatórios Completos**: Exportação em PDF, Excel e CSV
+- **Sistema Completo de Relatórios**: Exportação em PDF, Excel e CSV
 - **Histórico de Preços**: Acompanhamento temporal por produto
 - **Ordenação Avançada**: Múltiplos critérios de ordenação
 - **Estatísticas Avançadas**: Dados para gráficos e análises
@@ -534,12 +566,13 @@ Execute `python populate_test_data.py` para adicionar dados de exemplo e testar 
 ## 📈 Estatísticas do Projeto
 
 ### Status Atual
-- **Linhas de Código**: ~800 (Python + HTML + CSS + JS)
+- **Linhas de Código**: ~1200+ (Python + HTML + CSS + JS + AdminLTE)
 - **Cobertura de Testes**: 0% (próxima fase)
-- **Endpoints API**: 17 endpoints funcionais
+- **Endpoints API**: 20+ endpoints funcionais
 - **Modelos de Dados**: 3 entidades principais
 - **Validações**: 8 regras de negócio implementadas
-- **Funcionalidades Avançadas**: Busca fuzzy, cache, rate limiting, auto-seleção
+- **Interfaces**: 2 interfaces completas (AdminLTE + clássica)
+- **Funcionalidades Avançadas**: AdminLTE, busca fuzzy, cache, rate limiting, auto-seleção, relatórios completos
 
 ### Tecnologias e Versões
 - **Python**: 3.8+
