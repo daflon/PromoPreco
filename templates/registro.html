@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro - PromoPreço</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body class="hold-transition register-page">
+<div class="register-box">
+    <div class="card card-outline card-primary">
+        <div class="card-header text-center">
+            <h1><b>Promo</b>Preço</h1>
+        </div>
+        <div class="card-body">
+            <p class="login-box-msg">Registrar nova conta</p>
+
+            <form id="registroForm">
+                <div class="input-group mb-3">
+                    <input type="text" class="form-control" placeholder="Nome completo" id="nome" required>
+                    <div class="input-group-append">
+                        <div class="input-group-text">
+                            <span class="fas fa-user"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="input-group mb-3">
+                    <input type="email" class="form-control" placeholder="Email" id="email" required>
+                    <div class="input-group-append">
+                        <div class="input-group-text">
+                            <span class="fas fa-envelope"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="input-group mb-3">
+                    <input type="password" class="form-control" placeholder="Senha" id="senha" required minlength="6">
+                    <div class="input-group-append">
+                        <div class="input-group-text">
+                            <span class="fas fa-lock"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="input-group mb-3">
+                    <input type="password" class="form-control" placeholder="Confirmar senha" id="confirmarSenha" required>
+                    <div class="input-group-append">
+                        <div class="input-group-text">
+                            <span class="fas fa-lock"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-8">
+                        <div class="icheck-primary">
+                            <input type="checkbox" id="agreeTerms" name="terms" value="agree" required>
+                            <label for="agreeTerms">
+                                Concordo com os <a href="#" onclick="alert('Termos em desenvolvimento')">termos</a>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <button type="submit" class="btn btn-primary btn-block">Registrar</button>
+                    </div>
+                </div>
+            </form>
+
+            <div class="alert alert-danger" id="errorAlert" style="display: none;"></div>
+            <div class="alert alert-success" id="successAlert" style="display: none;"></div>
+
+            <a href="/login" class="text-center">Já tenho uma conta</a>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/js/adminlte.min.js"></script>
+
+<script>
+$(document).ready(function() {
+    $('#registroForm').on('submit', function(e) {
+        e.preventDefault();
+        
+        const nome = $('#nome').val();
+        const email = $('#email').val();
+        const senha = $('#senha').val();
+        const confirmarSenha = $('#confirmarSenha').val();
+        
+        if (senha !== confirmarSenha) {
+            $('#errorAlert').text('As senhas não coincidem').show();
+            return;
+        }
+        
+        $.ajax({
+            url: '/api/registro',
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({
+                nome: nome,
+                email: email,
+                senha: senha
+            }),
+            success: function(response) {
+                if (response.success) {
+                    $('#successAlert').text('Conta criada com sucesso! Redirecionando...').show();
+                    setTimeout(() => {
+                        window.location.href = '/';
+                    }, 2000);
+                }
+            },
+            error: function(xhr) {
+                const error = xhr.responseJSON?.error || 'Erro no registro';
+                $('#errorAlert').text(error).show();
+            }
+        });
+    });
+});
+</script>
+</body>
+</html>

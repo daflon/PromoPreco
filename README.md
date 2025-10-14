@@ -1,21 +1,21 @@
 # 🛒 PromoPreço
 
-Sistema para comparação de preços de produtos em diferentes estabelecimentos, permitindo aos usuários encontrar as melhores ofertas.
+Sistema moderno para comparação de preços com interface AdminLTE, permitindo cadastro de produtos, estabelecimentos e preços com busca inteligente e relatórios completos.
 
 ## 📋 Sobre o Projeto
 
-O PromoPreço é uma aplicação web que permite cadastrar produtos, estabelecimentos e seus respectivos preços, facilitando a comparação e busca pelas melhores ofertas disponíveis no mercado.
+O PromoPreço é uma aplicação web profissional construída com AdminLTE 3.x que oferece uma interface moderna e responsiva para gerenciar produtos, estabelecimentos e preços, incluindo sistema de autenticação, relatórios avançados e busca fuzzy inteligente.
 
 ## ✨ Funcionalidades
 
 ### Core
-- ✅ **CRUD Completo**: Criar, editar e excluir produtos, estabelecimentos e preços
-- ✅ **Validações**: CNPJ (14 dígitos), EAN (13 dígitos), preços > 0
-- ✅ **API REST**: Endpoints completos com PUT/DELETE
-- ✅ **Interface Moderna**: AdminLTE 3.x responsiva e profissional
-- ✅ **Múltiplas Interfaces**: AdminLTE (principal) + clássica (alternativa)
-- ✅ **Tratamento de Erros**: Respostas padronizadas e feedback visual
-- ✅ **Sistema Completo de Relatórios**: Exportação em PDF, Excel e CSV
+- ✅ **Interface AdminLTE**: Design moderno e profissional com AdminLTE 3.x
+- ✅ **Sistema de Autenticação**: Login, registro e controle de sessão
+- ✅ **CRUD Completo**: Produtos, estabelecimentos e preços
+- ✅ **API REST**: Endpoints completos com validações
+- ✅ **Landing Page**: Página inicial atrativa como index do projeto
+- ✅ **Dashboard Interativo**: Estatísticas e gráficos em tempo real
+- ✅ **Sistema de Relatórios**: Exportação em PDF, Excel e CSV
 
 ### Busca Inteligente 🆕
 - ✅ **Busca Fuzzy**: Tolerante a erros de digitação ("arrz" encontra "arroz")
@@ -42,16 +42,16 @@ O PromoPreço é uma aplicação web que permite cadastrar produtos, estabelecim
 
 ## 🚀 Tecnologias
 
-- **Backend**: Flask + SQLAlchemy + RapidFuzz
-- **Banco de Dados**: SQLite
-- **Frontend**: AdminLTE 3.x + Bootstrap 4 + FontAwesome
-- **Interface**: HTML5, CSS3, JavaScript (Vanilla)
-- **API**: REST JSON
-- **Cache**: Flask-Caching (60s consultas, 30s preços)
-- **Rate Limiting**: Flask-Limiter (30 req/min buscas, 20 req/min preços)
-- **Busca**: RapidFuzz para busca fuzzy tolerante a erros
-- **Relatórios**: ReportLab (PDF), XlsxWriter (Excel), CSV nativo
-- **UI Framework**: AdminLTE para interface moderna e responsiva
+- **Backend**: Flask + SQLAlchemy + Flask-Limiter + Flask-Caching
+- **Autenticação**: Sistema próprio com sessões Flask
+- **Banco de Dados**: SQLite com modelos relacionais
+- **Frontend**: AdminLTE 3.x + Bootstrap 4 + FontAwesome 6
+- **Interface**: HTML5, CSS3, JavaScript ES6
+- **API**: REST JSON com validações
+- **Busca**: RapidFuzz para busca fuzzy inteligente
+- **Relatórios**: ReportLab (PDF), XlsxWriter (Excel), CSV
+- **Performance**: Cache inteligente e rate limiting
+- **UI/UX**: Design responsivo e moderno
 
 ## 📦 Instalação
 
@@ -226,21 +226,21 @@ Acesse `http://localhost:5000` para a interface principal AdminLTE.
 
 ```
 PromoPreço/
-├── app.py                    # Aplicação Flask + AdminLTE + Relatórios
+├── app.py                    # Aplicação Flask principal
+├── auth.py                   # Sistema de autenticação
+├── models.py                 # Modelos do banco de dados
 ├── requirements.txt          # Dependências Python
-├── templates/                # Templates HTML
+├── templates/                # Templates HTML AdminLTE
 │   ├── base_adminlte.html    # Template base AdminLTE
+│   ├── landing.html          # Página inicial
+│   ├── login.html            # Página de login
+│   ├── registro.html         # Página de registro
 │   ├── cadastros_adminlte.html # Cadastros AdminLTE
 │   ├── dashboard_adminlte.html # Dashboard AdminLTE
-│   ├── relatorios_adminlte.html # Relatórios AdminLTE
-│   ├── cadastros.html        # Interface clássica
-│   ├── dashboard.html        # Dashboard clássico
-│   └── relatorios.html       # Relatórios clássicos
-├── Testes/                   # Scripts de teste
+│   └── relatorios_novo.html  # Relatórios AdminLTE
 ├── instance/                 # Dados da aplicação
 │   └── promoprecco.db        # Banco SQLite
 ├── .amazonq/rules/           # Regras do projeto
-├── ADMINLTE_GUIDE.md         # Guia do AdminLTE
 ├── ROADMAP.md               # Roadmap do projeto
 └── README.md                # Este arquivo
 ```

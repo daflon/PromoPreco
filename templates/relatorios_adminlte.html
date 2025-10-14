@@ -8,6 +8,35 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css">
+    <style>
+        .suggestions-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #ddd;
+            border-top: none;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 1000;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .suggestion-item {
+            padding: 8px 12px;
+            cursor: pointer;
+            border-bottom: 1px solid #eee;
+        }
+        .suggestion-item:hover {
+            background-color: #f8f9fa;
+        }
+        .suggestion-item:last-child {
+            border-bottom: none;
+        }
+        .form-group {
+            position: relative;
+        }
+    </style>
 </head>
 <body class="hold-transition sidebar-mini layout-fixed">
 <div class="wrapper">
@@ -40,15 +69,15 @@
             <nav class="mt-2">
                 <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
                     <li class="nav-item">
-                        <a href="/cadastros" class="nav-link">
-                            <i class="nav-icon fas fa-plus-circle"></i>
-                            <p>Cadastros</p>
-                        </a>
-                    </li>
-                    <li class="nav-item">
                         <a href="/" class="nav-link">
                             <i class="nav-icon fas fa-tachometer-alt"></i>
                             <p>Dashboard</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/cadastros" class="nav-link">
+                            <i class="nav-icon fas fa-plus-circle"></i>
+                            <p>Cadastros</p>
                         </a>
                     </li>
                     <li class="nav-item">
@@ -57,8 +86,32 @@
                             <p>Relatórios</p>
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" onclick="window.location.href='/#comparacao'">
+                            <i class="nav-icon fas fa-balance-scale"></i>
+                            <p>Comparar Preços</p>
+                        </a>
+                    </li>
+                    <li class="nav-item" id="admin-menu" style="display: none;">
+                        <a href="/admin" class="nav-link">
+                            <i class="nav-icon fas fa-users-cog"></i>
+                            <p>Administração</p>
+                        </a>
+                    </li>
                 </ul>
             </nav>
+            
+            <!-- Logout button at bottom -->
+            <div class="sidebar-logout" id="logout-menu" style="display: none; position: absolute; bottom: 10px; width: 100%;">
+                <ul class="nav nav-pills nav-sidebar flex-column">
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" onclick="logout()" style="color: #c2c7d0;">
+                            <i class="nav-icon fas fa-sign-out-alt"></i>
+                            <p>Logout</p>
+                        </a>
+                    </li>
+                </ul>
+            </div>
         </div>
     </aside>
 
@@ -111,17 +164,17 @@
                             <div class="col-md-3">
                                 <div class="form-group">
                                     <label for="produto-filtro">Produto</label>
-                                    <select class="form-control" id="produto-filtro">
-                                        <option value="">Todos os produtos</option>
-                                    </select>
+                                    <input type="text" class="form-control" id="produto-filtro" placeholder="Digite para buscar produto..." autocomplete="off">
+                                    <input type="hidden" id="produto-id" value="">
+                                    <div id="produto-suggestions" class="suggestions-dropdown" style="display: none;"></div>
                                 </div>
                             </div>
                             <div class="col-md-3">
                                 <div class="form-group">
                                     <label for="estabelecimento-filtro">Estabelecimento</label>
-                                    <select class="form-control" id="estabelecimento-filtro">
-                                        <option value="">Todos os estabelecimentos</option>
-                                    </select>
+                                    <input type="text" class="form-control" id="estabelecimento-filtro" placeholder="Digite para buscar estabelecimento..." autocomplete="off">
+                                    <input type="hidden" id="estabelecimento-id" value="">
+                                    <div id="estabelecimento-suggestions" class="suggestions-dropdown" style="display: none;"></div>
                                 </div>
                             </div>
                         </div>
@@ -129,6 +182,9 @@
                             <div class="col-12">
                                 <button type="button" class="btn btn-primary" onclick="gerarRelatorio()">
                                     <i class="fas fa-chart-bar"></i> Gerar Relatório
+                                </button>
+                                <button type="button" class="btn btn-secondary ml-2" onclick="limparFiltros()">
+                                    <i class="fas fa-eraser"></i> Limpar Filtros
                                 </button>
                                 <div class="btn-group ml-2">
                                     <button type="button" class="btn btn-success dropdown-toggle" data-toggle="dropdown">
@@ -304,7 +360,48 @@
         carregarFiltros();
         configurarDateRange();
         configurarBusca();
+        configurarAutocomplete();
+        verificarAdmin();
+        
+        // Carregar dados iniciais automaticamente
+        setTimeout(() => {
+            gerarRelatorio();
+        }, 1000);
     });
+    
+    let produtos = [];
+    let estabelecimentos = [];
+    let timeoutProduto = null;
+    let timeoutEstabelecimento = null;
+    
+    // Verificar se usuário é admin
+    async function verificarAdmin() {
+        try {
+            const response = await fetch('/api/usuario-atual');
+            if (response.ok) {
+                const data = await response.json();
+                $('#logout-menu').show();
+                if (data.is_admin) {
+                    $('#admin-menu').show();
+                }
+            }
+        } catch (error) {
+            console.log('Usuário não logado ou não é admin');
+        }
+    }
+    
+    // Função de logout
+    async function logout() {
+        try {
+            const response = await fetch('/api/logout', { method: 'POST' });
+            if (response.ok) {
+                window.location.href = '/login';
+            }
+        } catch (error) {
+            console.error('Erro no logout:', error);
+            window.location.href = '/login';
+        }
+    }
 
     function configurarDateRange() {
         $('#daterange').daterangepicker({
@@ -340,6 +437,115 @@
             }, 300);
         });
     }
+    
+    function configurarAutocomplete() {
+        // Autocomplete para produtos
+        $('#produto-filtro').on('input', function() {
+            const termo = $(this).val().trim();
+            
+            if (timeoutProduto) {
+                clearTimeout(timeoutProduto);
+            }
+            
+            timeoutProduto = setTimeout(() => {
+                mostrarSugestoesProdutos(termo);
+            }, 300);
+        });
+        
+        // Autocomplete para estabelecimentos
+        $('#estabelecimento-filtro').on('input', function() {
+            const termo = $(this).val().trim();
+            
+            if (timeoutEstabelecimento) {
+                clearTimeout(timeoutEstabelecimento);
+            }
+            
+            timeoutEstabelecimento = setTimeout(() => {
+                mostrarSugestoesEstabelecimentos(termo);
+            }, 300);
+        });
+        
+        // Fechar sugestões ao clicar fora
+        $(document).on('click', function(e) {
+            if (!$(e.target).closest('.form-group').length) {
+                $('.suggestions-dropdown').hide();
+            }
+        });
+    }
+    
+    function mostrarSugestoesProdutos(termo) {
+        const dropdown = $('#produto-suggestions');
+        
+        if (!termo || termo.length < 2) {
+            dropdown.hide();
+            return;
+        }
+        
+        const sugestoes = produtos.filter(p => 
+            p.descricao.toLowerCase().includes(termo.toLowerCase())
+        ).slice(0, 10);
+        
+        if (sugestoes.length === 0) {
+            dropdown.hide();
+            return;
+        }
+        
+        let html = '';
+        sugestoes.forEach(produto => {
+            html += `<div class="suggestion-item" onclick="selecionarProduto(${produto.id}, '${produto.descricao.replace(/'/g, "\\'")}')"><strong>${produto.descricao}</strong><br><small class="text-muted">EAN: ${produto.ean || 'N/A'}</small></div>`;
+        });
+        
+        dropdown.html(html).show();
+    }
+    
+    function mostrarSugestoesEstabelecimentos(termo) {
+        const dropdown = $('#estabelecimento-suggestions');
+        
+        if (!termo || termo.length < 2) {
+            dropdown.hide();
+            return;
+        }
+        
+        const sugestoes = estabelecimentos.filter(e => 
+            e.nome.toLowerCase().includes(termo.toLowerCase()) ||
+            e.bairro.toLowerCase().includes(termo.toLowerCase()) ||
+            e.cidade.toLowerCase().includes(termo.toLowerCase())
+        ).slice(0, 10);
+        
+        if (sugestoes.length === 0) {
+            dropdown.hide();
+            return;
+        }
+        
+        let html = '';
+        sugestoes.forEach(estabelecimento => {
+            html += `<div class="suggestion-item" onclick="selecionarEstabelecimento(${estabelecimento.id}, '${estabelecimento.nome.replace(/'/g, "\\'")}')"><strong>${estabelecimento.nome}</strong><br><small class="text-muted">${estabelecimento.bairro} - ${estabelecimento.cidade}</small></div>`;
+        });
+        
+        dropdown.html(html).show();
+    }
+    
+    function selecionarProduto(id, nome) {
+        $('#produto-filtro').val(nome);
+        $('#produto-id').val(id);
+        $('#produto-suggestions').hide();
+        
+        // Gerar relatório automaticamente
+        setTimeout(() => {
+            gerarRelatorio();
+        }, 300);
+    }
+    
+    function selecionarEstabelecimento(id, nome) {
+        $('#estabelecimento-filtro').val(nome);
+        $('#estabelecimento-id').val(id);
+        $('#estabelecimento-suggestions').hide();
+        
+        // Gerar relatório automaticamente
+        setTimeout(() => {
+            gerarRelatorio();
+        }, 300);
+    }
 
     function atualizarPeriodo() {
         const periodo = $('#periodo').val();
@@ -347,6 +553,10 @@
             $('#periodo-custom').show();
         } else {
             $('#periodo-custom').hide();
+            // Gerar relatório automaticamente quando período é alterado
+            setTimeout(() => {
+                gerarRelatorio();
+            }, 300);
         }
     }
 
@@ -357,18 +567,8 @@
                 fetch('/estabelecimentos')
             ]);
             
-            const produtos = await produtosResp.json();
-            const estabelecimentos = await estabelecimentosResp.json();
-            
-            const selectProduto = $('#produto-filtro');
-            produtos.forEach(p => {
-                selectProduto.append(`<option value="${p.id}">${p.descricao}</option>`);
-            });
-
-            const selectEstab = $('#estabelecimento-filtro');
-            estabelecimentos.forEach(e => {
-                selectEstab.append(`<option value="${e.id}">${e.nome}</option>`);
-            });
+            produtos = await produtosResp.json();
+            estabelecimentos = await estabelecimentosResp.json();
             
         } catch (error) {
             console.error('Erro ao carregar filtros:', error);
@@ -385,8 +585,8 @@
     async function gerarRelatorio() {
         try {
             const periodo = $('#periodo').val();
-            const produtoId = $('#produto-filtro').val();
-            const estabelecimentoId = $('#estabelecimento-filtro').val();
+            const produtoId = $('#produto-id').val();
+            const estabelecimentoId = $('#estabelecimento-id').val();
             
             let dias = periodo;
             if (periodo === 'custom') {
@@ -666,8 +866,8 @@
         
         try {
             const periodo = $('#periodo').val();
-            const produtoId = $('#produto-filtro').val();
-            const estabelecimentoId = $('#estabelecimento-filtro').val();
+            const produtoId = $('#produto-id').val();
+            const estabelecimentoId = $('#estabelecimento-id').val();
             
             let url = `/api/relatorio-precos?formato=${formato}&dias=${periodo}`;
             if (produtoId) url += `&produto_id=${produtoId}`;
@@ -685,6 +885,21 @@
                 delay: 5000
             });
         }
+    }
+    
+    function limparFiltros() {
+        $('#produto-filtro').val('');
+        $('#produto-id').val('');
+        $('#estabelecimento-filtro').val('');
+        $('#estabelecimento-id').val('');
+        $('#periodo').val('7');
+        $('#periodo-custom').hide();
+        $('.suggestions-dropdown').hide();
+        
+        // Gerar relatório com filtros limpos
+        setTimeout(() => {
+            gerarRelatorio();
+        }, 300);
     }
 </script>
 </body>

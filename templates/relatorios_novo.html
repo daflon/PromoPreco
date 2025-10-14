@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>PromoPreço | Relatórios Avançados</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css">
+    <style>
+        .report-card {
+            transition: transform 0.2s;
+            cursor: pointer;
+        }
+        .report-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .metric-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px;
+        }
+        .chart-container {
+            position: relative;
+            height: 300px;
+        }
+        .filter-section {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body class="hold-transition sidebar-mini layout-fixed">
+<div class="wrapper">
+    <!-- Navbar -->
+    <nav class="main-header navbar navbar-expand navbar-white navbar-light">
+        <ul class="navbar-nav">
+            <li class="nav-item">
+                <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
+            </li>
+            <li class="nav-item d-none d-sm-inline-block">
+                <a href="/" class="nav-link">Dashboard</a>
+            </li>
+            <li class="nav-item d-none d-sm-inline-block">
+                <a href="/cadastros" class="nav-link">Cadastros</a>
+            </li>
+            <li class="nav-item d-none d-sm-inline-block">
+                <a href="/relatorios" class="nav-link">Relatórios</a>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- Sidebar -->
+    <aside class="main-sidebar sidebar-dark-primary elevation-4">
+        <a href="/" class="brand-link">
+            <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzMiIGhlaWdodD0iMzMiIHZpZXdCb3g9IjAgMCAzMyAzMyIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjMzIiBoZWlnaHQ9IjMzIiByeD0iNSIgZmlsbD0iIzM0OThkYiIvPgo8dGV4dCB4PSIxNi41IiB5PSIyMCIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjE0IiBmaWxsPSJ3aGl0ZSIgdGV4dC1hbmNob3I9Im1pZGRsZSI+wqQ8L3RleHQ+Cjwvc3ZnPg==" alt="PromoPreço Logo" class="brand-image img-circle elevation-3" style="opacity: .8">
+            <span class="brand-text font-weight-light">PromoPreço</span>
+        </a>
+
+        <div class="sidebar">
+            <nav class="mt-2">
+                <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+                    <li class="nav-item">
+                        <a href="/" class="nav-link">
+                            <i class="nav-icon fas fa-tachometer-alt"></i>
+                            <p>Dashboard</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/cadastros" class="nav-link">
+                            <i class="nav-icon fas fa-plus-circle"></i>
+                            <p>Cadastros</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/relatorios" class="nav-link active">
+                            <i class="nav-icon fas fa-chart-bar"></i>
+                            <p>Relatórios</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" onclick="window.location.href='/#comparacao'">
+                            <i class="nav-icon fas fa-balance-scale"></i>
+                            <p>Comparar Preços</p>
+                        </a>
+                    </li>
+                    <li class="nav-item" id="admin-menu" style="display: none;">
+                        <a href="/admin" class="nav-link">
+                            <i class="nav-icon fas fa-users-cog"></i>
+                            <p>Administração</p>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </aside>
+
+    <!-- Content Wrapper -->
+    <div class="content-wrapper">
+        <div class="content-header">
+            <div class="container-fluid">
+                <div class="row mb-2">
+                    <div class="col-sm-6">
+                        <h1 class="m-0"><i class="fas fa-chart-line"></i> Relatórios Avançados</h1>
+                    </div>
+                    <div class="col-sm-6">
+                        <ol class="breadcrumb float-sm-right">
+                            <li class="breadcrumb-item"><a href="/">Home</a></li>
+                            <li class="breadcrumb-item active">Relatórios</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main content -->
+        <section class="content">
+            <div class="container-fluid">
+                
+                <!-- Tipos de Relatórios -->
+                <div class="row mb-4">
+                    <div class="col-md-4">
+                        <div class="card report-card" onclick="abrirRelatorio('vendas')">
+                            <div class="card-body text-center">
+                                <i class="fas fa-chart-pie fa-3x text-primary mb-3"></i>
+                                <h5>Análise de Mercado</h5>
+                                <p class="text-muted">Produtos populares, estabelecimentos ativos e tendências</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card report-card" onclick="abrirRelatorio('precos')">
+                            <div class="card-body text-center">
+                                <i class="fas fa-table fa-3x text-success mb-3"></i>
+                                <h5>Relatório Detalhado</h5>
+                                <p class="text-muted">Listagem completa de preços com filtros avançados</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card report-card" onclick="abrirRelatorio('comparativo')">
+                            <div class="card-body text-center">
+                                <i class="fas fa-balance-scale fa-3x text-warning mb-3"></i>
+                                <h5>Comparativo</h5>
+                                <p class="text-muted">Compare preços entre estabelecimentos</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Filtros -->
+                <div class="filter-section" id="filtros-section" style="display: none;">
+                    <h5><i class="fas fa-filter"></i> Filtros</h5>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="periodo">Período</label>
+                                <select class="form-control" id="periodo">
+                                    <option value="7">Últimos 7 dias</option>
+                                    <option value="30" selected>Últimos 30 dias</option>
+                                    <option value="90">Últimos 90 dias</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-4" id="produto-filter" style="display: none;">
+                            <div class="form-group">
+                                <label for="produto-busca">Produto</label>
+                                <input type="text" class="form-control" id="produto-busca" placeholder="Digite para buscar produto...">
+                                <input type="hidden" id="produto-id">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label>&nbsp;</label>
+                                <div>
+                                    <button type="button" class="btn btn-primary" onclick="gerarRelatorioAtual()">
+                                        <i class="fas fa-play"></i> Gerar
+                                    </button>
+                                    <button type="button" class="btn btn-secondary ml-2" onclick="limparFiltros()">
+                                        <i class="fas fa-eraser"></i> Limpar
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Conteúdo do Relatório -->
+                <div id="relatorio-content" style="display: none;">
+                    
+                    <!-- Métricas -->
+                    <div class="row mb-4" id="metricas-section">
+                        <div class="col-md-3">
+                            <div class="card metric-card">
+                                <div class="card-body text-center">
+                                    <h3 id="metrica-1">-</h3>
+                                    <p id="metrica-1-label">Métrica 1</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card metric-card">
+                                <div class="card-body text-center">
+                                    <h3 id="metrica-2">-</h3>
+                                    <p id="metrica-2-label">Métrica 2</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card metric-card">
+                                <div class="card-body text-center">
+                                    <h3 id="metrica-3">-</h3>
+                                    <p id="metrica-3-label">Métrica 3</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card metric-card">
+                                <div class="card-body text-center">
+                                    <h3 id="metrica-4">-</h3>
+                                    <p id="metrica-4-label">Métrica 4</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Gráficos -->
+                    <div class="row mb-4" id="graficos-section">
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h3 class="card-title" id="grafico-1-title">Gráfico 1</h3>
+                                    <div class="card-tools">
+                                        <button type="button" class="btn btn-tool" onclick="exportarGrafico('grafico-1')">
+                                            <i class="fas fa-download"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    <div class="chart-container">
+                                        <canvas id="grafico-1"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h3 class="card-title" id="grafico-2-title">Gráfico 2</h3>
+                                    <div class="card-tools">
+                                        <button type="button" class="btn btn-tool" onclick="exportarGrafico('grafico-2')">
+                                            <i class="fas fa-download"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    <div class="chart-container">
+                                        <canvas id="grafico-2"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tabela de Dados -->
+                    <div class="card" id="tabela-section">
+                        <div class="card-header">
+                            <h3 class="card-title" id="tabela-title">Dados Detalhados</h3>
+                            <div class="card-tools">
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-success btn-sm dropdown-toggle" data-toggle="dropdown">
+                                        <i class="fas fa-download"></i> Exportar
+                                    </button>
+                                    <div class="dropdown-menu">
+                                        <a class="dropdown-item" href="#" onclick="exportarDados('csv')">
+                                            <i class="fas fa-file-csv"></i> CSV
+                                        </a>
+                                        <a class="dropdown-item" href="#" onclick="exportarDados('excel')">
+                                            <i class="fas fa-file-excel"></i> Excel
+                                        </a>
+                                        <a class="dropdown-item" href="#" onclick="exportarDados('pdf')">
+                                            <i class="fas fa-file-pdf"></i> PDF
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body table-responsive p-0">
+                            <table class="table table-hover" id="tabela-dados">
+                                <thead id="tabela-header"></thead>
+                                <tbody id="tabela-body"></tbody>
+                            </table>
+                        </div>
+                        <div class="card-footer">
+                            <div class="row">
+                                <div class="col-sm-12 col-md-5">
+                                    <div id="info-registros"></div>
+                                </div>
+                                <div class="col-sm-12 col-md-7">
+                                    <div id="paginacao" class="float-right"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </section>
+    </div>
+
+    <!-- Footer -->
+    <footer class="main-footer">
+        <strong>Copyright &copy; 2024 <a href="#">PromoPreço</a>.</strong>
+        Sistema de comparação de preços.
+        <div class="float-right d-none d-sm-inline-block">
+            <b>Versão</b> 1.0.0
+        </div>
+    </footer>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/js/adminlte.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+let tipoRelatorioAtual = '';
+let dadosRelatorio = [];
+let graficos = {};
+
+$(document).ready(function() {
+    verificarAdmin();
+    configurarBuscaProduto();
+});
+
+function verificarAdmin() {
+    $.ajax({
+        url: '/api/usuario-atual',
+        method: 'GET',
+        success: function(response) {
+            if (response.is_admin) {
+                $('#admin-menu').show();
+            }
+        }
+    });
+}
+
+function abrirRelatorio(tipo) {
+    tipoRelatorioAtual = tipo;
+    $('#filtros-section').show();
+    
+    // Configurar filtros específicos
+    if (tipo === 'comparativo') {
+        $('#produto-filter').show();
+    } else {
+        $('#produto-filter').hide();
+    }
+    
+    // Scroll para filtros
+    $('html, body').animate({
+        scrollTop: $("#filtros-section").offset().top - 100
+    }, 500);
+}
+
+function configurarBuscaProduto() {
+    let timeout = null;
+    $('#produto-busca').on('input', function() {
+        const termo = $(this).val().trim();
+        
+        if (timeout) clearTimeout(timeout);
+        
+        timeout = setTimeout(() => {
+            if (termo.length >= 2) {
+                buscarProdutos(termo);
+            }
+        }, 300);
+    });
+}
+
+async function buscarProdutos(termo) {
+    try {
+        const response = await fetch(`/produtos?busca=${encodeURIComponent(termo)}`);
+        const produtos = await response.json();
+        
+        // Implementar dropdown de sugestões aqui
+        console.log('Produtos encontrados:', produtos);
+    } catch (error) {
+        console.error('Erro ao buscar produtos:', error);
+    }
+}
+
+async function gerarRelatorioAtual() {
+    if (!tipoRelatorioAtual) return;
+    
+    const periodo = $('#periodo').val();
+    const produtoId = $('#produto-id').val();
+    
+    try {
+        let url = '';
+        let params = `?dias=${periodo}`;
+        
+        if (produtoId && tipoRelatorioAtual === 'comparativo') {
+            params += `&produto_id=${produtoId}`;
+        }
+        
+        switch (tipoRelatorioAtual) {
+            case 'vendas':
+                url = `/api/relatorio-vendas${params}`;
+                break;
+            case 'precos':
+                url = `/api/relatorio-precos${params}`;
+                break;
+            case 'comparativo':
+                if (!produtoId) {
+                    alert('Selecione um produto para o relatório comparativo');
+                    return;
+                }
+                url = `/api/relatorio-comparativo${params}`;
+                break;
+        }
+        
+        const response = await fetch(url);
+        const dados = await response.json();
+        
+        dadosRelatorio = dados;
+        exibirRelatorio(dados);
+        
+    } catch (error) {
+        console.error('Erro ao gerar relatório:', error);
+        alert('Erro ao gerar relatório');
+    }
+}
+
+function exibirRelatorio(dados) {
+    $('#relatorio-content').show();
+    
+    switch (tipoRelatorioAtual) {
+        case 'vendas':
+            exibirRelatorioVendas(dados);
+            break;
+        case 'precos':
+            exibirRelatorioPrecos(dados);
+            break;
+        case 'comparativo':
+            exibirRelatorioComparativo(dados);
+            break;
+    }
+    
+    // Scroll para o relatório
+    $('html, body').animate({
+        scrollTop: $("#relatorio-content").offset().top - 100
+    }, 500);
+}
+
+function exibirRelatorioVendas(dados) {
+    // Métricas
+    $('#metrica-1').text(dados.produtos_populares.length);
+    $('#metrica-1-label').text('Produtos Ativos');
+    
+    $('#metrica-2').text(dados.estabelecimentos_ativos.length);
+    $('#metrica-2-label').text('Estabelecimentos');
+    
+    $('#metrica-3').text(dados.evolucao_diaria.length);
+    $('#metrica-3-label').text('Dias com Dados');
+    
+    $('#metrica-4').text(dados.evolucao_diaria.reduce((sum, d) => sum + d.total, 0));
+    $('#metrica-4-label').text('Total Registros');
+    
+    // Gráfico 1 - Produtos Populares
+    $('#grafico-1-title').text('Produtos Mais Pesquisados');
+    criarGraficoBarras('grafico-1', 
+        dados.produtos_populares.map(p => p.descricao.substring(0, 20) + '...'),
+        dados.produtos_populares.map(p => p.total_precos)
+    );
+    
+    // Gráfico 2 - Estabelecimentos Ativos
+    $('#grafico-2-title').text('Estabelecimentos Mais Ativos');
+    criarGraficoPizza('grafico-2',
+        dados.estabelecimentos_ativos.map(e => e.nome),
+        dados.estabelecimentos_ativos.map(e => e.total_precos)
+    );
+    
+    // Tabela
+    $('#tabela-title').text('Evolução Diária');
+    const headers = ['Data', 'Registros'];
+    const rows = dados.evolucao_diaria.map(d => [d.data, d.total]);
+    criarTabela(headers, rows);
+}
+
+function exibirRelatorioPrecos(dados) {
+    if (!Array.isArray(dados)) return;
+    
+    // Métricas
+    const precos = dados.map(d => d.preco);
+    const precoMedio = precos.reduce((a, b) => a + b, 0) / precos.length;
+    const menorPreco = Math.min(...precos);
+    const maiorPreco = Math.max(...precos);
+    
+    $('#metrica-1').text(dados.length);
+    $('#metrica-1-label').text('Total Registros');
+    
+    $('#metrica-2').text(`R$ ${precoMedio.toFixed(2)}`);
+    $('#metrica-2-label').text('Preço Médio');
+    
+    $('#metrica-3').text(`R$ ${menorPreco.toFixed(2)}`);
+    $('#metrica-3-label').text('Menor Preço');
+    
+    $('#metrica-4').text(`R$ ${maiorPreco.toFixed(2)}`);
+    $('#metrica-4-label').text('Maior Preço');
+    
+    // Ocultar gráficos para relatório detalhado
+    $('#graficos-section').hide();
+    
+    // Tabela
+    $('#tabela-title').text('Registros de Preços');
+    const headers = ['Produto', 'Estabelecimento', 'Bairro', 'Preço', 'Data'];
+    const rows = dados.map(d => [d.produto, d.estabelecimento, d.bairro, `R$ ${d.preco.toFixed(2)}`, d.data_coleta]);
+    criarTabela(headers, rows);
+}
+
+function exibirRelatorioComparativo(dados) {
+    // Métricas
+    $('#metrica-1').text(`R$ ${dados.estatisticas.menor_preco.toFixed(2)}`);
+    $('#metrica-1-label').text('Menor Preço');
+    
+    $('#metrica-2').text(`R$ ${dados.estatisticas.maior_preco.toFixed(2)}`);
+    $('#metrica-2-label').text('Maior Preço');
+    
+    $('#metrica-3').text(`R$ ${dados.estatisticas.preco_medio.toFixed(2)}`);
+    $('#metrica-3-label').text('Preço Médio');
+    
+    $('#metrica-4').text(`R$ ${dados.estatisticas.economia_maxima.toFixed(2)}`);
+    $('#metrica-4-label').text('Economia Máxima');
+    
+    // Gráfico 1 - Preços por Estabelecimento
+    $('#grafico-1-title').text('Preços por Estabelecimento');
+    criarGraficoBarras('grafico-1',
+        dados.precos.map(p => p.estabelecimento),
+        dados.precos.map(p => p.preco)
+    );
+    
+    // Ocultar segundo gráfico
+    $('#grafico-2').parent().parent().hide();
+    
+    // Tabela
+    $('#tabela-title').text(`Comparativo - ${dados.produto.descricao}`);
+    const headers = ['Estabelecimento', 'Bairro', 'Preço', 'Data Coleta'];
+    const rows = dados.precos.map(p => [p.estabelecimento, p.bairro, `R$ ${p.preco.toFixed(2)}`, p.data_coleta]);
+    criarTabela(headers, rows);
+}
+
+function criarGraficoBarras(canvasId, labels, data) {
+    const ctx = document.getElementById(canvasId).getContext('2d');
+    
+    if (graficos[canvasId]) {
+        graficos[canvasId].destroy();
+    }
+    
+    graficos[canvasId] = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Valores',
+                data: data,
+                backgroundColor: 'rgba(54, 162, 235, 0.8)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+}
+
+function criarGraficoPizza(canvasId, labels, data) {
+    const ctx = document.getElementById(canvasId).getContext('2d');
+    
+    if (graficos[canvasId]) {
+        graficos[canvasId].destroy();
+    }
+    
+    graficos[canvasId] = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: labels,
+            datasets: [{
+                data: data,
+                backgroundColor: [
+                    '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false
+        }
+    });
+}
+
+function criarTabela(headers, rows) {
+    // Cabeçalho
+    let headerHtml = '<tr>';
+    headers.forEach(header => {
+        headerHtml += `<th>${header}</th>`;
+    });
+    headerHtml += '</tr>';
+    $('#tabela-header').html(headerHtml);
+    
+    // Corpo
+    let bodyHtml = '';
+    rows.forEach(row => {
+        bodyHtml += '<tr>';
+        row.forEach(cell => {
+            bodyHtml += `<td>${cell}</td>`;
+        });
+        bodyHtml += '</tr>';
+    });
+    $('#tabela-body').html(bodyHtml);
+    
+    // Info
+    $('#info-registros').text(`Mostrando ${rows.length} registros`);
+}
+
+async function exportarDados(formato) {
+    if (!tipoRelatorioAtual || !dadosRelatorio) return;
+    
+    const periodo = $('#periodo').val();
+    const produtoId = $('#produto-id').val();
+    
+    let url = '';
+    let params = `?formato=${formato}&dias=${periodo}`;
+    
+    if (produtoId && tipoRelatorioAtual === 'comparativo') {
+        params += `&produto_id=${produtoId}`;
+    }
+    
+    switch (tipoRelatorioAtual) {
+        case 'precos':
+            url = `/api/relatorio-precos${params}`;
+            break;
+        default:
+            alert('Exportação não disponível para este tipo de relatório');
+            return;
+    }
+    
+    window.open(url, '_blank');
+}
+
+function exportarGrafico(graficoId) {
+    if (graficos[graficoId]) {
+        const link = document.createElement('a');
+        link.download = `${graficoId}.png`;
+        link.href = graficos[graficoId].toBase64Image();
+        link.click();
+    }
+}
+
+function limparFiltros() {
+    $('#periodo').val('30');
+    $('#produto-busca').val('');
+    $('#produto-id').val('');
+    $('#relatorio-content').hide();
+    tipoRelatorioAtual = '';
+}
+</script>
+</body>
+</html>

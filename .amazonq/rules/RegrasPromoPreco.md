@@ -2,14 +2,15 @@
 
 ## Stack Tecnológica Implementada
 - **Backend**: Python 3.x + Flask + SQLAlchemy + RapidFuzz
+- **Autenticação**: Sistema próprio com sessões Flask
 - **Banco de Dados**: SQLite (promoprecco.db)
-- **Frontend**: HTML5 + CSS3 + JavaScript (Vanilla)
+- **Frontend**: AdminLTE 3.x + HTML5 + CSS3 + JavaScript ES6
+- **UI Framework**: AdminLTE + Bootstrap 4 + FontAwesome 6
 - **Validações**: Backend com regex para CNPJ/EAN
 - **Busca**: Fuzzy search com RapidFuzz
 - **Cache**: Flask-Caching para otimização
 - **Rate Limiting**: Flask-Limiter para controle de acesso
 - **Relatórios**: ReportLab (PDF), XlsxWriter (Excel), CSV nativo
-- **Testes**: Requests para testes de API
 
 ## Objetivo do Sistema
 Sistema web completo para cadastro, edição, exclusão e comparação de preços de produtos em diferentes estabelecimentos.
@@ -17,9 +18,11 @@ Sistema web completo para cadastro, edição, exclusão e comparação de preço
 ## Funcionalidades Implementadas
 
 ### 1. Modelos de Dados (SQLAlchemy)
+- **Usuario**: id, nome, email, senha_hash, ativo, is_admin, data_criacao, ultimo_login
 - **Produto**: id, descricao (obrigatório), ean (13 dígitos, opcional)
 - **Estabelecimento**: id, nome (obrigatório), cnpj (14 dígitos, opcional), bairro (obrigatório), cidade (obrigatório)
-- **Preco**: id, produto_id (FK), estabelecimento_id (FK), preco (>0), data_coleta (automática)
+- **Preco**: id, produto_id (FK), estabelecimento_id (FK), preco (>0), data_coleta (automática), usuario_id (FK)
+- **Favorito**: id, usuario_id (FK), produto_id (FK), data_criacao
 
 ### 2. API REST Completa
 **Produtos**
@@ -51,8 +54,18 @@ Sistema web completo para cadastro, edição, exclusão e comparação de preço
 - `GET /precos/ordenados` - Preços com ordenação avançada
 - `GET /api/estatisticas-avancadas` - Estatísticas para gráficos
 
+**Autenticação**
+- `GET /login` - Página de login
+- `GET /registro` - Página de registro
+- `POST /api/login` - Fazer login
+- `POST /api/registro` - Registrar usuário
+- `POST /api/logout` - Fazer logout
+- `GET /api/usuario-atual` - Dados do usuário logado
+- `GET /status` - Status de autenticação
+
 **Sistema e Interface**
-- `GET /` - Interface principal AdminLTE (dashboard)
+- `GET /` - Landing page (index do projeto)
+- `GET /landing` - Página inicial
 - `GET /cadastros` - Interface de cadastros AdminLTE
 - `GET /dashboard` - Interface de dashboard clássica
 - `GET /dashboard/adminlte` - Interface de dashboard AdminLTE
@@ -92,20 +105,18 @@ PromoPreço/
 ├── instance/promoprecco.db
 ├── templates/
 │   ├── base_adminlte.html (Template base AdminLTE)
+│   ├── landing.html (Página inicial)
+│   ├── login.html (Página de login)
+│   ├── registro.html (Página de registro)
 │   ├── cadastros_adminlte.html (Cadastros AdminLTE)
 │   ├── dashboard_adminlte.html (Dashboard AdminLTE)
-│   ├── relatorios_adminlte.html (Relatórios AdminLTE)
-│   ├── cadastros.html (Interface clássica)
-│   ├── dashboard.html (Dashboard clássico)
-│   └── relatorios.html (Relatórios clássicos)
-├── Testes/ (Scripts de teste e população)
-├── app.py (Flask + SQLAlchemy + AdminLTE + Relatórios)
+│   └── relatorios_novo.html (Relatórios AdminLTE)
+├── app.py (Flask principal)
+├── auth.py (Sistema de autenticação)
+├── models.py (Modelos do banco)
 ├── requirements.txt
 ├── README.md
-├── ROADMAP.md
-├── ADMINLTE_GUIDE.md
-├── ATUALIZACOES_DOCUMENTACAO.md
-└── CORRECOES_APLICADAS.md
+└── ROADMAP.md
 ```
 
 ## Regras de Negócio
@@ -149,10 +160,10 @@ PromoPreço/
 - **Interface de Relatórios**: Página dedicada para geração de relatórios
 
 ## Status Atual
-**Versão**: Sistema Completo com Interface AdminLTE e Relatórios Avançados
-**Estado**: CRUD, validações, dashboard AdminLTE, busca fuzzy, comparação automática, relatórios e interface moderna funcionais
-**Melhorias**: Interface AdminLTE responsiva, busca fuzzy, auto-seleção, comparação automática, produtos com preços, relatórios completos, múltiplas interfaces
-**Próximos passos**: Sistema de usuários, geolocalização, API mobile, PWA
+**Versão**: Sistema Completo com AdminLTE e Autenticação
+**Estado**: Interface AdminLTE, sistema de autenticação, landing page, CRUD completo, relatórios e busca fuzzy funcionais
+**Implementado**: AdminLTE 3.x, login/registro, landing page como index, dashboard interativo, relatórios avançados
+**Próximos passos**: Favoritos, geolocalização, API mobile, PWA
 
 ### Interface Atual
 - **Interface Principal**: AdminLTE 3.x responsiva e moderna

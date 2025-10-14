@@ -41,6 +41,29 @@
 
         <!-- Right navbar links -->
         <ul class="navbar-nav ml-auto">
+            <!-- User Menu -->
+            <li class="nav-item dropdown" id="userMenu" style="display: none;">
+                <a class="nav-link" data-toggle="dropdown" href="#">
+                    <i class="far fa-user"></i>
+                    <span id="userName"></span>
+                </a>
+                <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
+                    <div class="dropdown-divider"></div>
+                    <a href="#" class="dropdown-item" onclick="verFavoritos()">
+                        <i class="fas fa-heart mr-2"></i> Meus Favoritos
+                    </a>
+                    <div class="dropdown-divider"></div>
+                    <a href="#" class="dropdown-item" onclick="logout()">
+                        <i class="fas fa-sign-out-alt mr-2"></i> Sair
+                    </a>
+                </div>
+            </li>
+            <!-- Login Button -->
+            <li class="nav-item" id="loginButton">
+                <a href="/login" class="nav-link">
+                    <i class="fas fa-sign-in-alt"></i> Login
+                </a>
+            </li>
             <li class="nav-item">
                 <a class="nav-link" data-widget="fullscreen" href="#" role="button">
                     <i class="fas fa-expand-arrows-alt"></i>
@@ -80,8 +103,44 @@
                             <p>Relatórios</p>
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" onclick="abrirComparacao()">
+                            <i class="nav-icon fas fa-balance-scale"></i>
+                            <p>Comparar Preços</p>
+                        </a>
+                    </li>
+                    <li class="nav-item" id="adminMenu" style="display: none;">
+                        <a href="/admin" class="nav-link {% if request.endpoint == 'admin_panel' %}active{% endif %}">
+                            <i class="nav-icon fas fa-users-cog"></i>
+                            <p>Administração</p>
+                        </a>
+                    </li>
+                    <li class="nav-item" id="favoritosMenu" style="display: none;">
+                        <a href="#" class="nav-link" onclick="verFavoritos()">
+                            <i class="nav-icon fas fa-heart"></i>
+                            <p>Favoritos</p>
+                        </a>
+                    </li>
+                    <li class="nav-item" id="listasMenu" style="display: none;">
+                        <a href="#" class="nav-link" onclick="verListas()">
+                            <i class="nav-icon fas fa-list"></i>
+                            <p>Listas</p>
+                        </a>
+                    </li>
                 </ul>
             </nav>
+            
+            <!-- Logout button at bottom -->
+            <div class="sidebar-logout" id="logoutMenu" style="display: none; position: absolute; bottom: 10px; width: 100%;">
+                <ul class="nav nav-pills nav-sidebar flex-column">
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" onclick="logout()" style="color: #c2c7d0;">
+                            <i class="nav-icon fas fa-sign-out-alt"></i>
+                            <p>Logout</p>
+                        </a>
+                    </li>
+                </ul>
+            </div>
         </div>
     </aside>
 
@@ -128,6 +187,215 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
 <!-- AdminLTE App -->
 <script src="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/js/adminlte.min.js"></script>
+
+<script>
+// Verificar se usuário está logado
+$(document).ready(function() {
+    verificarUsuario();
+});
+
+function verificarUsuario() {
+    $.ajax({
+        url: '/api/usuario-atual',
+        method: 'GET',
+        success: function(response) {
+            $('#userName').text(response.nome);
+            $('#userMenu').show();
+            $('#favoritosMenu').show();
+            $('#listasMenu').show();
+            $('#logoutMenu').show();
+            $('#loginButton').hide();
+            
+            // Mostrar menu admin apenas para administradores
+            if (response.is_admin) {
+                $('#adminMenu').show();
+            } else {
+                $('#adminMenu').hide();
+            }
+        },
+        error: function() {
+            $('#userMenu').hide();
+            $('#favoritosMenu').hide();
+            $('#listasMenu').hide();
+            $('#logoutMenu').hide();
+            $('#loginButton').show();
+        }
+    });
+}
+
+function logout() {
+    $.ajax({
+        url: '/api/logout',
+        method: 'POST',
+        success: function() {
+            window.location.href = '/login';
+        }
+    });
+}
+
+async function verFavoritos() {
+    try {
+        const response = await fetch('/api/favoritos');
+        if (!response.ok) {
+            throw new Error('Erro ao carregar favoritos');
+        }
+        
+        const favoritos = await response.json();
+        mostrarModalFavoritos(favoritos);
+    } catch (error) {
+        console.error('Erro ao carregar favoritos:', error);
+        alert('Erro ao carregar favoritos. Faça login primeiro.');
+    }
+}
+
+function mostrarModalFavoritos(favoritos) {
+    let html = '<div class="modal fade" id="modalFavoritos" tabindex="-1" role="dialog"><div class="modal-dialog modal-lg" role="document"><div class="modal-content"><div class="modal-header"><h5 class="modal-title"><i class="fas fa-heart"></i> Meus Favoritos</h5><button type="button" class="close" data-dismiss="modal"><span>&times;</span></button></div><div class="modal-body">';
+    
+    if (favoritos.length === 0) {
+        html += '<div class="alert alert-info"><i class="fas fa-info-circle"></i> Você ainda não tem produtos favoritos.</div>';
+    } else {
+        html += '<div class="table-responsive"><table class="table table-striped"><thead><tr><th>Produto</th><th>Menor Preço</th><th>Ações</th></tr></thead><tbody>';
+        
+        favoritos.forEach(fav => {
+            const menorPreco = fav.menor_preco ? 
+                `R$ ${fav.menor_preco.preco.toFixed(2)} - ${fav.menor_preco.estabelecimento}` : 
+                'Sem preços cadastrados';
+            
+            html += `<tr><td><strong>${fav.produto.descricao}</strong><br><small class="text-muted">EAN: ${fav.produto.ean || 'N/A'}</small></td><td>${menorPreco}</td><td><button class="btn btn-sm btn-primary" onclick="compararProduto(${fav.produto.id})" title="Comparar preços"><i class="fas fa-balance-scale"></i></button><button class="btn btn-sm btn-danger ml-1" onclick="removerFavorito(${fav.id})" title="Remover dos favoritos"><i class="fas fa-trash"></i></button></td></tr>`;
+        });
+        
+        html += '</tbody></table></div>';
+    }
+    
+    html += '</div><div class="modal-footer"><button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button></div></div></div></div>';
+    
+    $('#modalFavoritos').remove();
+    $('body').append(html);
+    $('#modalFavoritos').modal('show');
+}
+
+async function removerFavorito(favoritoId) {
+    if (!confirm('Tem certeza que deseja remover este produto dos favoritos?')) {
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/api/favoritos/${favoritoId}`, {
+            method: 'DELETE'
+        });
+        
+        if (response.ok) {
+            verFavoritos();
+        } else {
+            alert('Erro ao remover favorito');
+        }
+    } catch (error) {
+        console.error('Erro ao remover favorito:', error);
+        alert('Erro ao remover favorito');
+    }
+}
+
+function compararProduto(produtoId) {
+    $('#modalFavoritos').modal('hide');
+    window.location.href = `/#comparacao?produto=${produtoId}`;
+}
+
+async function verListas() {
+    try {
+        const response = await fetch('/api/listas');
+        if (!response.ok) {
+            throw new Error('Erro ao carregar listas');
+        }
+        
+        const listas = await response.json();
+        mostrarModalListas(listas);
+    } catch (error) {
+        console.error('Erro ao carregar listas:', error);
+        alert('Erro ao carregar listas. Faça login primeiro.');
+    }
+}
+
+function mostrarModalListas(listas) {
+    let html = '<div class="modal fade" id="modalListas" tabindex="-1" role="dialog"><div class="modal-dialog modal-lg" role="document"><div class="modal-content"><div class="modal-header"><h5 class="modal-title"><i class="fas fa-list"></i> Minhas Listas</h5><button type="button" class="close" data-dismiss="modal"><span>&times;</span></button></div><div class="modal-body">';
+    
+    if (listas.length === 0) {
+        html += '<div class="alert alert-info"><i class="fas fa-info-circle"></i> Você ainda não tem listas criadas.</div>';
+    } else {
+        listas.forEach(lista => {
+            html += `<div class="card mb-3"><div class="card-header d-flex justify-content-between align-items-center"><h6 class="mb-0"><i class="fas fa-list mr-2"></i>${lista.nome}</h6><div><button class="btn btn-sm btn-primary" onclick="compararLista([${lista.produtos.map(p => p.id).join(',')}])" title="Comparar preços da lista"><i class="fas fa-balance-scale"></i> Comparar</button></div></div><div class="card-body">`;
+            
+            if (lista.produtos.length === 0) {
+                html += '<p class="text-muted mb-0">Lista vazia</p>';
+            } else {
+                html += '<div class="row">';
+                lista.produtos.forEach(produto => {
+                    html += `<div class="col-md-6 mb-2"><small><i class="fas fa-box mr-1"></i>${produto.descricao}</small></div>`;
+                });
+                html += '</div>';
+            }
+            
+            html += '</div></div>';
+        });
+    }
+    
+    html += '</div><div class="modal-footer"><button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button></div></div></div></div>';
+    
+    $('#modalListas').remove();
+    $('body').append(html);
+    $('#modalListas').modal('show');
+}
+
+async function compararLista(produtosIds) {
+    try {
+        const response = await fetch('/api/listas/comparar', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ produtos: produtosIds })
+        });
+        
+        if (!response.ok) {
+            throw new Error('Erro ao comparar lista');
+        }
+        
+        const resultado = await response.json();
+        mostrarResultadoComparacao(resultado);
+    } catch (error) {
+        console.error('Erro ao comparar lista:', error);
+        alert('Erro ao comparar lista');
+    }
+}
+
+function mostrarResultadoComparacao(resultado) {
+    $('#modalListas').modal('hide');
+    
+    let html = '<div class="modal fade" id="modalComparacao" tabindex="-1" role="dialog"><div class="modal-dialog modal-xl" role="document"><div class="modal-content"><div class="modal-header"><h5 class="modal-title"><i class="fas fa-chart-bar"></i> Comparação de Lista</h5><button type="button" class="close" data-dismiss="modal"><span>&times;</span></button></div><div class="modal-body">';
+    
+    // Resumo
+    html += `<div class="row mb-4"><div class="col-md-4"><div class="card bg-success text-white"><div class="card-body text-center"><h4>R$ ${resultado.total_menor.toFixed(2)}</h4><p class="mb-0">Menor Total</p></div></div></div><div class="col-md-4"><div class="card bg-danger text-white"><div class="card-body text-center"><h4>R$ ${resultado.total_maior.toFixed(2)}</h4><p class="mb-0">Maior Total</p></div></div></div><div class="col-md-4"><div class="card bg-warning text-white"><div class="card-body text-center"><h4>R$ ${resultado.economia.toFixed(2)}</h4><p class="mb-0">Economia</p></div></div></div></div>`;
+    
+    // Tabela de produtos
+    html += '<div class="table-responsive"><table class="table table-striped"><thead><tr><th>Produto</th><th>Menor Preço</th><th>Estabelecimento</th><th>Maior Preço</th><th>Estabelecimento</th><th>Diferença</th></tr></thead><tbody>';
+    
+    resultado.produtos.forEach(item => {
+        const diferenca = item.maior_preco - item.menor_preco;
+        html += `<tr><td>${item.produto.descricao}</td><td class="text-success font-weight-bold">R$ ${item.menor_preco.toFixed(2)}</td><td>${item.estabelecimento_menor}</td><td class="text-danger">R$ ${item.maior_preco.toFixed(2)}</td><td>${item.estabelecimento_maior}</td><td class="text-warning">R$ ${diferenca.toFixed(2)}</td></tr>`;
+    });
+    
+    html += '</tbody></table></div></div><div class="modal-footer"><button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button></div></div></div></div>';
+    
+    $('#modalComparacao').remove();
+    $('body').append(html);
+    $('#modalComparacao').modal('show');
+}
+
+function abrirComparacao() {
+    // Redirecionar para página de comparação ou abrir modal
+    window.location.href = '/#comparacao';
+}
+</script>
+
 {% block extra_js %}{% endblock %}
 </body>
 </html>

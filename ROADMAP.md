@@ -53,10 +53,10 @@ Sistema para comparação de preços de produtos em diferentes estabelecimentos,
 **Concluído em: Anterior**
 **Melhorias**: Busca fuzzy, auto-seleção, comparação automática e relatórios completos implementados
 
-## ✅ Fase 3.5 - Interface AdminLTE Moderna
-**Status: Implementado**
+## ✅ Fase 3.5 - Interface AdminLTE e Autenticação
+**Status: Completamente Implementado**
 **Concluído em: Atual**
-**Melhorias**: Interface moderna com AdminLTE 3.x, múltiplas interfaces, navegação aprimorada
+**Melhorias**: Interface AdminLTE completa, sistema de autenticação, landing page como index
 
 ### Melhorias de Interface
 - [x] **Busca inteligente**
@@ -254,12 +254,13 @@ Sistema para comparação de preços de produtos em diferentes estabelecimentos,
 
 ### Atual
 - **Backend**: Flask, SQLAlchemy, SQLite, RapidFuzz
-- **Frontend**: AdminLTE 3.x, HTML5, CSS3, JavaScript (Vanilla)
-- **UI Framework**: AdminLTE, Bootstrap 4, FontAwesome
+- **Autenticação**: Sistema próprio com sessões Flask
+- **Frontend**: AdminLTE 3.x, HTML5, CSS3, JavaScript ES6
+- **UI Framework**: AdminLTE, Bootstrap 4, FontAwesome 6
 - **Cache**: Flask-Caching
 - **Rate Limiting**: Flask-Limiter
-- **Relatórios**: ReportLab (PDF), XlsxWriter (Excel)
-- **Testes**: Requests para APIs
+- **Relatórios**: ReportLab (PDF), XlsxWriter (Excel), CSV
+- **Interface**: Landing page como index, design responsivo
 - **Deploy**: Local
 
 ### Planejada
